@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Albion & Caledonia Expedition: An Interactive Itinerary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Earth & Cool Sky -->
+    <!-- Application Structure Plan: The SPA is designed as a top-down narrative journey. It starts with a high-level visual overview (the map) to orient the user, followed by crucial pre-travel logistics. The core of the app is the interactive day-by-day accordion, which allows users to explore the dense schedule without being overwhelmed. This is followed by a quantitative summary (the budget chart) and actionable resources (checklist). This structure mirrors the natural flow of trip planning: get the big picture, understand the requirements, dive into the details, check the costs, and finally, execute bookings. A sticky navigation bar enables non-linear exploration for users who want to jump to specific sections. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Full Trip Route -> Goal: Visualize geographical progression -> Viz: Static map image with CSS-positioned interactive hotspots -> Interaction: Click hotspot to smooth-scroll to the relevant itinerary day -> Justification: Provides immediate spatial context and acts as a visual navigation hub.
+        - Report Info: Detailed daily schedule -> Goal: Organize large volume of sequential data -> Viz: Accordion component -> Interaction: Click to expand/collapse each day -> Justification: Prevents information overload, keeping the UI clean and user-focused.
+        - Report Info: Budget Breakdown -> Goal: Compare expense proportions -> Viz: Donut Chart -> Interaction: Hover for tooltips, button to toggle between 'Per Person' and 'Total Group' costs -> Justification: A chart is more engaging and easier to interpret than a table for proportional data.
+        - Report Info: Key Logistics (Car, Accommodation) -> Goal: Inform critical pre-trip decisions -> Viz: Styled content cards -> Interaction: Static Display -> Justification: Presents vital advice in a clear, digestible format.
+        - Report Info: Booking Checklist -> Goal: Provide an actionable to-do list -> Viz: Styled HTML list -> Interaction: Static display -> Justification: A simple, clean list is the most effective format for a checklist.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        .map-hotspot {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-color: rgba(239, 68, 68, 0.8);
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .map-hotspot:hover {
+            transform: scale(1.5);
+            background-color: rgba(239, 68, 68, 1);
+        }
+        .map-hotspot .tooltip {
+            visibility: hidden;
+            width: 120px;
+            background-color: #334155;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 150%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+        }
+        .map-hotspot:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 350px;
+            max-height: 400px;
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-800">
+
+    <nav id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <span class="font-bold text-xl text-slate-700">UK Grand Tour</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Overview</a>
+                        <a href="#logistics" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Logistics</a>
+                        <a href="#itinerary" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Itinerary</a>
+                        <a href="#budget" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Budget</a>
+                        <a href="#checklist" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Checklist</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900">The Albion & Caledonia Expedition</h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">A 17-Day Interactive Grand Tour of the United Kingdom for 5 Adventurers</p>
+            <div class="mt-8 flex justify-center space-x-6 md:space-x-12 text-slate-700">
+                <div class="text-center">
+                    <div class="text-3xl font-bold">17</div>
+                    <div class="text-sm">Days</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold">~1,500</div>
+                    <div class="text-sm">Miles</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold">8</div>
+                    <div class="text-sm">Major Stops</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0 space-y-16">
+
+            <section id="overview" class="scroll-mt-16">
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">The Expedition Route</h2>
+                    <p class="text-center text-slate-600 mb-6 max-w-3xl mx-auto">This interactive map provides a visual overview of your journey through England and Scotland. Click on any of the red markers to jump directly to that part of the detailed daily itinerary. The route begins in London and concludes in the majestic Scottish Highlands, with the final departure from Edinburgh.</p>
+                    <div id="map-container" class="relative w-full max-w-4xl mx-auto bg-slate-200 rounded-lg overflow-hidden">
+                        <img src="https://placehold.co/1200x800/e0f2fe/0c4a6e?text=Map+of+UK+Tour+Route" alt="A map outlining the road trip route through the UK" class="w-full h-auto">
+                        <div id="London" class="map-hotspot" style="top: 80%; left: 60%;" data-scroll-to="#day-1"><span class="tooltip">London</span></div>
+                        <div id="Cotswolds" class="map-hotspot" style="top: 73%; left: 51%;" data-scroll-to="#day-5"><span class="tooltip">Cotswolds</span></div>
+                        <div id="York" class="map-hotspot" style="top: 48%; left: 55%;" data-scroll-to="#day-7"><span class="tooltip">York</span></div>
+                        <div id="Manchester" class="map-hotspot" style="top: 52%; left: 49%;" data-scroll-to="#day-9"><span class="tooltip">Manchester</span></div>
+                        <div id="Edinburgh" class="map-hotspot" style="top: 32%; left: 45%;" data-scroll-to="#day-10"><span class="tooltip">Edinburgh</span></div>
+                        <div id="Inverness" class="map-hotspot" style="top: 17%; left: 37%;" data-scroll-to="#day-13"><span class="tooltip">Inverness</span></div>
+                        <div id="Skye" class="map-hotspot" style="top: 18%; left: 22%;" data-scroll-to="#day-14"><span class="tooltip">Isle of Skye</span></div>
+                        <div id="Glencoe" class="map-hotspot" style="top: 25%; left: 30%;" data-scroll-to="#day-15"><span class="tooltip">Glencoe</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="logistics" class="scroll-mt-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">The Expedition Blueprint: Logistics</h2>
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Success on the road depends on solid planning. Here are the key logistical recommendations for your vehicle, accommodation, and driving in the UK, condensed for quick reference.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-bold text-xl mb-3 text-cyan-800">Vehicle: The People Carrier</h3>
+                        <p class="text-slate-600">For 5 adults with international luggage, a 7-seater MPV (e.g., Ford Galaxy, VW Sharan) is essential. Folding the rearmost seats provides ample boot space (~700L) for all bags, ensuring comfort. An SUV's luggage capacity is insufficient. Book a one-way rental from London Heathrow (LHR) to Edinburgh (EDI).</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-bold text-xl mb-3 text-cyan-800">Accommodation: Hybrid Strategy</h3>
+                        <p class="text-slate-600">A mix of lodging optimizes cost and experience. Use large Airbnbs for city bases (London, Edinburgh), a private dorm in a social hostel (York), and an authentic self-catering cottage in scenic areas (Cotswolds). This provides comfort, saves on food costs, and offers unique local stays.</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-bold text-xl mb-3 text-cyan-800">Driving: Key UK Rules</h3>
+                        <p class="text-slate-600">Your Indian licence is valid for 12 months. Remember the most important rules: <br> 1. Drive on the **LEFT**. <br> 2. Traffic on roundabouts flows **CLOCKWISE** (give way to your right). <br> 3. Speed limits are in **MPH**.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="itinerary" class="scroll-mt-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">The Day-by-Day Expedition</h2>
+                 <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">This is your complete 17-day plan. Click on any day to expand and see the detailed hourly schedule, including activities, driving times, and meal suggestions. Icons denote key activities: ✈️ Arrival/Departure, 🚗 Drive, 🏰 Attraction, 🏨 Check-in, 🍴 Food, 🛌 Rest.</p>
+                <div id="accordion-container" class="space-y-2">
+                </div>
+            </section>
+
+            <section id="budget" class="scroll-mt-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Expedition Budget Breakdown</h2>
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">This chart visualizes the estimated mid-range budget. The total comes to approximately **£2,906 per person**. Use the button below to toggle the view between a single person's cost and the total for the entire group of five. Hover over the chart segments for precise figures.</p>
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <div class="chart-container">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                    <div class="text-center mt-6">
+                        <button id="toggleBudgetBtn" class="bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-cyan-800 transition-colors">
+                            Show Total Group Budget
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="checklist" class="scroll-mt-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Pre-Booking & Resources</h2>
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">July is peak season in the UK. Advance booking for the items below is not just recommended, it's mandatory to avoid disappointment and inflated prices. Use this as your action plan.</p>
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <div><strong class="text-slate-800">Flights & Visa:</strong> Book flights (DEL-LHR, EDI-DEL) and apply for UK Visitor Visa immediately.</div>
+                        </li>
+                        <li class="flex items-start">
+                           <span class="text-green-500 mr-3 mt-1">✓</span>
+                           <div><strong class="text-slate-800">Rental Car:</strong> Book a 7-seater MPV (one-way LHR to EDI). Consider Avis for promotional one-way fees.</div>
+                        </li>
+                        <li class="flex items-start">
+                           <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <div><strong class="text-slate-800">Accommodation:</strong> Book all stays: London & Edinburgh (Airbnb), Cotswolds (Cottage), York (Hostel), Manchester (Aparthotel), and all Highland hotels.</div>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <div><strong class="text-slate-800">London Attractions:</strong> Book timed-entry tickets for Buckingham Palace, Tower of London, and London Eye (Fast Track). Book your West End show.</div>
+                        </li>
+                        <li class="flex items-start">
+                           <span class="text-green-500 mr-3 mt-1">✓</span>
+                           <div><strong class="text-slate-800">Other Major Attractions:</strong> Book timed-entry tickets for Windsor Castle and Edinburgh Castle.</div>
+                        </li>
+                         <li class="flex items-start">
+                           <span class="text-green-500 mr-3 mt-1">✓</span>
+                           <div><strong class="text-slate-800">Tours:</strong> Book your Scotch Whisky Distillery tour in the Highlands in advance to secure a spot.</div>
+                        </li>
+                    </ul>
+                    <div class="mt-6 border-t pt-4 text-center text-slate-600">
+                        <strong>Emergency Number in UK:</strong> Dial <strong>999</strong> or <strong>112</strong>.
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>&copy; 2024 The Albion & Caledonia Expedition. Have an unforgettable journey!</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const itineraryData = [
+        { day: 1, id: 'day-1', date: 'July 12', title: 'Arrival and Immersion', location: 'London', schedule: [
+            { time: '08:00-10:00', activity: '✈️ Arrive at LHR, clear immigration & baggage claim.' },
+            { time: '10:00-11:30', activity: '🚆 Transfer to Airbnb via Elizabeth Line/Heathrow Express.' },
+            { time: '13:00-15:00', activity: '🏨 Check-in, unpack, and rest.' },
+            { time: '15:00-18:00', activity: '🚶 Explore local area, visit Borough Market.' },
+            { time: '18:00-20:00', activity: '🍴 Casual dinner at Borough Market or a local pub.' },
+            { time: '20:00 onwards', activity: '🛌 Early night to combat jet lag.' },
+        ]},
+        { day: 2, id: 'day-2', date: 'July 13', title: 'A Royal and Political Affair', location: 'London', schedule: [
+            { time: '10:00-10:45', activity: '💂 Witness the Changing of the Guard at Buckingham Palace.' },
+            { time: '11:00-13:30', activity: '🏰 Tour the Buckingham Palace State Rooms (pre-booked).' },
+            { time: '14:30-17:30', activity: '🚶 Walking tour: St. James\'s Park, Westminster Abbey, Big Ben.' },
+            { time: '19:00-22:30', activity: '🎭 Attend a West End Theatre Show (pre-booked).' },
+        ]},
+        { day: 3, id: 'day-3', date: 'July 14', title: 'Towers, Bridges & Views', location: 'London', schedule: [
+            { time: '10:00-13:00', activity: '🏰 Explore the Tower of London & Crown Jewels (pre-booked).' },
+            { time: '13:00-14:00', activity: '🌉 Walk across the iconic Tower Bridge.' },
+            { time: '15:00-16:00', activity: '🎡 Ride the London Eye (Fast Track tickets pre-booked).' },
+            { time: '19:30 onwards', activity: '🍴 Curated Indian Dinner Experience (e.g., Dishoom, Tayyabs).' },
+        ]},
+        { day: 4, id: 'day-4', date: 'July 15', title: 'Culture, Shopping & Prep', location: 'London', schedule: [
+            { time: '10:00-13:00', activity: '🏛️ Museum visit (British Museum or Natural History Museum).' },
+            { time: '14:00-18:00', activity: '🛍️ Flexible Afternoon: Shopping (Oxford St) or explore Notting Hill.' },
+            { time: '18:00 onwards', activity: '🧳 Pack and prepare for the road trip.' },
+        ]},
+        { day: 5, id: 'day-5', date: 'July 16', title: 'The Great Escape', location: 'London to Cotswolds', schedule: [
+            { time: '09:00-11:30', activity: '🚗 Collect rental MPV from Heathrow Airport.' },
+            { time: '12:30-15:30', activity: '🏰 Explore Windsor Castle (pre-booked).' },
+            { time: '16:00-17:30', activity: '🚗 Drive to the Cotswolds.' },
+            { time: '17:30-18:30', activity: '🏞️ Photo stop at the picturesque village of Castle Combe.' },
+            { time: '19:30 onwards', activity: '🏨 Check into self-catering cottage and have a pub dinner.' },
+        ]},
+        { day: 6, id: 'day-6', date: 'July 17', title: 'Quintessential England', location: 'Cotswolds & Stratford', schedule: [
+            { time: '09:30-13:00', activity: '🏞️ Explore Cotswolds villages: Bourton-on-the-Water, Lower Slaughter.' },
+            { time: '14:45-17:30', activity: '📜 Explore Stratford-upon-Avon, Shakespeare\'s Birthplace.' },
+            { time: '18:30 onwards', activity: '🛌 Relax at the cottage or visit another country pub.' },
+        ]},
+        { day: 7, id: 'day-7', date: 'July 18', title: 'Northward Bound', location: 'Cotswolds to York', schedule: [
+            { time: '08:30-11:00', activity: '🚗 Drive to the Peak District National Park.' },
+            { time: '11:00-13:30', activity: '🍰 Visit Bakewell (try the tart!) and see Chatsworth House exterior.' },
+            { time: '14:30-16:00', activity: '🚗 Drive to the historic city of York.' },
+            { time: '16:00 onwards', activity: '🏨 Check into hostel/apartment and evening walk.' },
+        ]},
+        { day: 8, id: 'day-8', date: 'July 19', title: 'Ancient York', location: 'York', schedule: [
+            { time: '09:30-12:00', activity: '⛪ Explore York Minster and walk the ancient City Walls.' },
+            { time: '12:00-14:00', activity: '🚶 Wander through The Shambles (Diagon Alley inspiration).' },
+            { time: '14:00-16:30', activity: '🚂 Visit the National Railway Museum (free).' },
+            { time: '20:30-22:00', activity: '👻 Take an entertaining evening Ghost Tour.' },
+        ]},
+        { day: 9, id: 'day-9', date: 'July 20', title: 'Industrial Heritage & Football', location: 'York to Manchester', schedule: [
+            { time: '11:00-12:30', activity: '🚗 Drive to Manchester.' },
+            { time: '14:00-17:30', activity: '⚽ Football Afternoon: Tour Old Trafford or Etihad Stadium.' },
+            { time: '19:30 onwards', activity: '🍻 Dinner and drinks in the trendy Northern Quarter.' },
+        ]},
+        { day: 10, id: 'day-10', date: 'July 21', title: 'Road to Scotland', location: 'Manchester to Edinburgh', schedule: [
+            { time: '10:00-12:30', activity: '🏛️ Explore John Rylands Library or People\'s History Museum.' },
+            { time: '13:00-17:30', activity: '🚗 Drive to Edinburgh, with a stop at Hadrian\'s Wall.' },
+            { time: '19:00 onwards', activity: '🏨 Check into Edinburgh Airbnb for 3 nights.' },
+        ]},
+        { day: 11, id: 'day-11', date: 'July 22', title: 'Royal Mile & Old Town', location: 'Edinburgh', schedule: [
+            { time: '10:00-13:00', activity: '🏰 Explore Edinburgh Castle (pre-booked), see the One o\'Clock Gun.' },
+            { time: '14:00-17:00', activity: '🚶 Walk the Royal Mile, visit St. Giles\' Cathedral.' },
+            { time: '17:00-18:30', activity: '🏰 Tour the Palace of Holyroodhouse.' },
+            { time: '20:00 onwards', activity: '🍻 Dinner and drinks in the historic Grassmarket area.' },
+        ]},
+        { day: 12, id: 'day-12', date: 'July 23', title: 'Hikes, Views & New Town', location: 'Edinburgh', schedule: [
+            { time: '09:30-12:00', activity: '⛰️ Hike up Arthur\'s Seat for panoramic city views.' },
+            { time: '13:30-17:00', activity: '🚶 Explore the Georgian New Town and walk up Calton Hill.' },
+            { time: '19:00 onwards', activity: '🍴 Farewell Edinburgh dinner with Scottish cuisine.' },
+        ]},
+        { day: 13, id: 'day-13', date: 'July 24', title: 'Into the Highlands', location: 'Edinburgh to Inverness', schedule: [
+            { time: '09:00-11:00', activity: '🚗 Drive north into Perthshire, gateway to the Highlands.' },
+            { time: '12:30-14:30', activity: '🥃 Scotch Whisky Distillery Tour (e.g., Tomatin, pre-booked).' },
+            { time: '15:30 onwards', activity: '🏨 Drive to Inverness and check into hotel/B&B for 2 nights.' },
+        ]},
+        { day: 14, id: 'day-14', date: 'July 25', title: 'Monsters & Magic', location: 'Loch Ness & Isle of Skye', schedule: [
+            { time: '08:00-09:30', activity: '🏞️ Drive along Loch Ness, optional boat cruise.' },
+            { time: '09:30-11:30', activity: '🚗 Drive to Skye, stopping at Eilean Donan Castle for photos.' },
+            { time: '11:30-16:30', activity: '⛰️ Explore Skye: Portree, Old Man of Storr, The Quiraing.' },
+            { time: '16:30-19:00', activity: '🚗 Long, scenic drive back to Inverness.' },
+        ]},
+        { day: 15, id: 'day-15', date: 'July 26', title: 'The Majestic Glens', location: 'Inverness to Glencoe', schedule: [
+            { time: '10:00-12:30', activity: '🚗 Drive south, stop at the Commando Memorial for Ben Nevis views.' },
+            { time: '13:30-14:00', activity: '🚗 Drive into the dramatic valley of Glencoe.' },
+            { time: '14:00-17:00', activity: '🥾 Afternoon Hike: Choose a trail like the Lost Valley.' },
+            { time: '19:00 onwards', activity: '🍻 Final expedition dinner at a traditional Highland Inn.' },
+        ]},
+        { day: 16, id: 'day-16', date: 'July 27', title: 'Loch Lomond & Departure Prep', location: 'Glencoe to Edinburgh', schedule: [
+            { time: '10:30-12:30', activity: '🚗 Drive south along the shores of Loch Lomond.' },
+            { time: '16:00-17:00', activity: '🚗 Return rental car at Edinburgh Airport (EDI).' },
+            { time: '17:00 onwards', activity: '🏨 Check into airport hotel for convenience.' },
+        ]},
+        { day: 17, id: 'day-17', date: 'July 28', title: 'Homeward Bound', location: 'Edinburgh', schedule: [
+            { time: 'Morning', activity: '✈️ Check-in for return flight from EDI to New Delhi.' },
+        ]},
+    ];
+
+    const accordionContainer = document.getElementById('accordion-container');
+    itineraryData.forEach(item => {
+        const section = document.createElement('div');
+        section.id = item.id;
+        section.className = 'bg-white rounded-lg shadow-md overflow-hidden scroll-mt-20';
+        
+        const header = document.createElement('button');
+        header.className = 'accordion-header w-full text-left p-4 flex justify-between items-center bg-gray-100 hover:bg-amber-100 transition-colors';
+        header.innerHTML = `
+            <div class="flex items-center">
+                <span class="text-cyan-700 font-bold w-20">Day ${item.day}</span>
+                <span class="font-semibold text-slate-800">${item.title}</span>
+            </div>
+            <div class="flex items-center">
+                <span class="text-sm text-slate-500 mr-4 hidden sm:block">${item.location}</span>
+                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+        `;
+        
+        const content = document.createElement('div');
+        content.className = 'accordion-content p-4 border-t border-gray-200';
+        
+        let scheduleHtml = '<ul class="space-y-3">';
+        item.schedule.forEach(event => {
+            scheduleHtml += `<li class="flex"><strong class="w-28 text-slate-600 font-medium">${event.time}</strong><span>${event.activity}</span></li>`;
+        });
+        scheduleHtml += '</ul>';
+        content.innerHTML = scheduleHtml;
+
+        section.appendChild(header);
+        section.appendChild(content);
+        accordionContainer.appendChild(section);
+
+        header.addEventListener('click', () => {
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+            document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = '0px');
+            document.querySelectorAll('.accordion-header svg').forEach(svg => svg.style.transform = '');
+
+            if (!isOpen) {
+                content.style.maxHeight = content.scrollHeight + "px";
+                header.querySelector('svg').style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+
+    const budgetData = {
+        perPerson: {
+            labels: ['Accommodation', 'Food', 'Attractions', 'Miscellaneous', 'Fuel'],
+            values: [1280, 850, 316, 425, 51]
+        },
+        group: {
+            labels: ['Accommodation', 'Food', 'Attractions', 'Miscellaneous', 'Fuel'],
+            values: [1280 * 5, 850 * 5, 316 * 5, 425 * 5, 51 * 5]
+        }
+    };
+
+    const ctx = document.getElementById('budgetChart').getContext('2d');
+    let currentView = 'perPerson';
+    const budgetChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: budgetData.perPerson.labels,
+            datasets: [{
+                label: 'Cost in £',
+                data: budgetData.perPerson.values,
+                backgroundColor: ['#0e7490', '#15803d', '#be123c', '#a16207', '#4a5568'],
+                borderColor: '#fdfbf6',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(context.parsed);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    const toggleBtn = document.getElementById('toggleBudgetBtn');
+    toggleBtn.addEventListener('click', () => {
+        if (currentView === 'perPerson') {
+            currentView = 'group';
+            budgetChart.data.datasets[0].data = budgetData.group.values;
+            toggleBtn.textContent = 'Show Per Person Budget';
+        } else {
+            currentView = 'perPerson';
+            budgetChart.data.datasets[0].data = budgetData.perPerson.values;
+            toggleBtn.textContent = 'Show Total Group Budget';
+        }
+        budgetChart.update();
+    });
+    
+    document.querySelectorAll('.map-hotspot').forEach(spot => {
+        spot.addEventListener('click', function() {
+            const targetId = this.dataset.scrollTo;
+            const targetElement = document.querySelector(targetId);
+            if(targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                const header = targetElement.querySelector('.accordion-header');
+                const content = targetElement.querySelector('.accordion-content');
+                const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+                if (!isOpen) {
+                   header.click();
+                }
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
