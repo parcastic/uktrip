@@ -73,6 +73,7 @@
                             <a href="#itinerary" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Itinerary</a>
                             <a href="#events" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Events</a>
                             <a href="#budget" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Budget</a>
+                            <a href="#conversion" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Utilities</a>
                             <a href="#logistics" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Logistics</a>
                         </div>
                     </div>
@@ -135,6 +136,39 @@
                         <div class="text-center mt-6">
                             <button id="toggleBudgetBtn" class="bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">Show Total Group Budget</button>
                             <p id="budgetText" class="mt-4 text-lg font-semibold text-slate-700"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="conversion" class="scroll-mt-16 fade-in-section">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Conversion Utilities</h2>
+                    <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Quick tools to help you convert currency and distance during your trip planning.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 material-card">
+                            <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Currency Converter</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="gbp-input" class="block text-sm font-medium text-slate-700">Pounds (£)</label>
+                                    <input type="number" id="gbp-input" placeholder="Enter amount in GBP" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                                </div>
+                                <div>
+                                    <label for="inr-input" class="block text-sm font-medium text-slate-700">Rupees (₹)</label>
+                                    <input type="number" id="inr-input" placeholder="Enter amount in INR" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 material-card">
+                            <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Distance Converter</h3>
+                             <div class="space-y-4">
+                                <div>
+                                    <label for="miles-input" class="block text-sm font-medium text-slate-700">Miles (mi)</label>
+                                    <input type="number" id="miles-input" placeholder="Enter distance in miles" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                                </div>
+                                <div>
+                                    <label for="km-input" class="block text-sm font-medium text-slate-700">Kilometers (km)</label>
+                                    <input type="number" id="km-input" placeholder="Enter distance in kilometers" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -225,6 +259,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const GBP_TO_INR_RATE = 105.5;
+    const MILES_TO_KM_RATE = 1.60934;
 
     const itineraryData = [
         { day: 1, id: 'day-1', date: 'July 13', dayOfWeek: 'Sunday', title: 'Arrival and Immersion', location: 'London',
@@ -539,7 +574,49 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, { threshold: 0.1 });
     sections.forEach(section => observer.observe(section));
+
+    // Conversion Utilities
+    const gbpInput = document.getElementById('gbp-input');
+    const inrInput = document.getElementById('inr-input');
+    const milesInput = document.getElementById('miles-input');
+    const kmInput = document.getElementById('km-input');
+
+    gbpInput.addEventListener('input', () => {
+        const gbpValue = parseFloat(gbpInput.value);
+        if (!isNaN(gbpValue)) {
+            inrInput.value = (gbpValue * GBP_TO_INR_RATE).toFixed(2);
+        } else {
+            inrInput.value = '';
+        }
+    });
+
+    inrInput.addEventListener('input', () => {
+        const inrValue = parseFloat(inrInput.value);
+        if (!isNaN(inrValue)) {
+            gbpInput.value = (inrValue / GBP_TO_INR_RATE).toFixed(2);
+        } else {
+            gbpInput.value = '';
+        }
+    });
+
+    milesInput.addEventListener('input', () => {
+        const milesValue = parseFloat(milesInput.value);
+        if (!isNaN(milesValue)) {
+            kmInput.value = (milesValue * MILES_TO_KM_RATE).toFixed(2);
+        } else {
+            kmInput.value = '';
+        }
+    });
+
+    kmInput.addEventListener('input', () => {
+        const kmValue = parseFloat(kmInput.value);
+        if (!isNaN(kmValue)) {
+            milesInput.value = (kmValue / MILES_TO_KM_RATE).toFixed(2);
+        } else {
+            milesInput.value = '';
+        }
+    });
 });
 </script>
 </body>
-</html>
+</ht
