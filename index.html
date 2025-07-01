@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UK Grand Tour: 4 Confirmed 1 Waitlist</title>
+    <title>UK Grand Tour</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -226,7 +226,7 @@
         <div class="absolute inset-0 bg-black/50"></div>
         <div class="relative text-center z-10 p-4">
             <p class="text-sm text-slate-300 mb-2">Designed by Parth</p>
-            <h1 class="text-5xl md:text-7xl font-bold">UK Grand Tour: 4 Confirmed 1 Waitlist</h1>
+            <h1 id="main-title" class="text-5xl md:text-7xl font-bold">UK Grand Tour</h1>
             <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-slate-200">An Immersive 15-Day Expedition | July 19th - August 2nd</p>
         </div>
         <div class="absolute bottom-10 text-white z-10">
@@ -664,6 +664,22 @@
                 mobileMenu.classList.remove('open');
             });
         });
+
+        // Dynamic Title
+        const mainTitle = document.getElementById('main-title');
+        const today = new Date();
+        const tripStart = new Date('2025-07-19');
+        const diffTime = tripStart - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 0) {
+            const newTitle = `UK Grand Tour: ${diffDays} days to go`;
+            mainTitle.textContent = newTitle;
+            document.title = newTitle;
+        } else {
+             mainTitle.textContent = "UK Grand Tour: 4 Confirmed 1 Waitlist";
+             document.title = "UK Grand Tour: 4 Confirmed 1 Waitlist";
+        }
     });
     </script>
 </body>
