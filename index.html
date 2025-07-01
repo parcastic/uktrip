@@ -43,7 +43,7 @@
             height: auto;
             z-index: -100;
             transform: translateX(-50%) translateY(-50%);
-            background-size: cover;
+            object-fit: cover;
         }
 
         .accordion-content {
@@ -66,7 +66,6 @@
             left: 0;
             border-radius: 50%;
             opacity: 0;
-            transform: translate(-50%, -50%);
             z-index: 9999;
         }
         @media (pointer: coarse) {
@@ -81,7 +80,6 @@
             width: 40px;
             height: 40px;
             background-color: rgba(8, 145, 178, 0.2);
-            transition: transform 0.2s ease-out;
         }
         body:hover .cursor-dot, body:hover .cursor-outline { opacity: 1; }
 
@@ -115,9 +113,13 @@
         .path-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             margin: auto;
-            height: 600px;
+            aspect-ratio: 1 / 1.2;
+            background-image: url('https://i.imgur.com/eBfG4z6.png'); /* Stylized map of UK */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
         .path-svg {
             position: absolute;
@@ -130,22 +132,23 @@
             z-index: 2;
             background-color: #0891b2;
             color: white;
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
+            line-height: 1.2;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 4px solid white;
+            border: 3px solid white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .path-node:hover {
-            transform: scale(1.1);
+            transform: translate(-50%, -50%) scale(1.1);
             background-color: #0e7490;
         }
         .material-card {
@@ -162,6 +165,7 @@
             top: 0;
             left: -100%;
             width: 75%;
+            max-width: 300px;
             height: 100%;
             background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -182,24 +186,23 @@
     <nav id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0"><span class="font-bold text-xl text-slate-700">UK Grand Tour</span></div>
-                <!-- Desktop Menu -->
-                <div class="hidden md:block">
-                    <div id="desktop-nav-links" class="ml-10 flex items-baseline space-x-4">
-                        <a href="#overview" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Route</a>
-                        <a href="#itinerary" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Itinerary</a>
-                        <a href="#events" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Events</a>
-                        <a href="#budget" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Budget</a>
-                        <a href="#logistics" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Logistics</a>
-                    </div>
-                </div>
-                <!-- Hamburger Button -->
+                 <!-- Hamburger Button -->
                 <div class="md:hidden">
                     <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-md text-slate-600 hover:text-white hover:bg-cyan-700 focus:outline-none">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                         </svg>
                     </button>
+                </div>
+                <div class="flex-shrink-0"><span class="font-bold text-xl text-slate-700">UK Grand Tour</span></div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div id="desktop-nav-links" class="ml-10 flex items-baseline space-x-4">
+                        <a href="#itinerary" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Itinerary</a>
+                        <a href="#events" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Events</a>
+                        <a href="#budget" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Budget</a>
+                        <a href="#logistics" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Logistics</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,7 +211,6 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="mobile-nav shadow-2xl">
         <div class="p-5">
-            <a href="#overview" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Route</a>
             <a href="#itinerary" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Itinerary</a>
             <a href="#events" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Events</a>
             <a href="#budget" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Budget</a>
@@ -223,6 +225,7 @@
         </video>
         <div class="absolute inset-0 bg-black/50"></div>
         <div class="relative text-center z-10 p-4">
+            <p class="text-sm text-slate-300 mb-2">Designed by Parth</p>
             <h1 class="text-5xl md:text-7xl font-bold">UK Grand Tour: 4 Confirmed 1 Waitlist</h1>
             <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-slate-200">An Immersive 15-Day Expedition | July 19th - August 2nd</p>
         </div>
@@ -259,16 +262,42 @@
                 </div>
             </section>
 
-            <!-- Interactive Path Section -->
-            <section id="overview" class="scroll-mt-16">
-                <h2 class="text-4xl font-bold text-slate-800 mb-2 text-center section-title">The Expedition Path</h2>
-                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Click any city to jump to that day's itinerary.</p>
-                <div class="bg-white rounded-xl shadow-2xl p-4 md:p-6 material-card">
-                    <div class="path-container">
-                        <svg class="path-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-                            <path id="route-path" d="M 100 500 Q 150 200, 350 150 T 650 350" stroke="#0891b2" stroke-width="4" fill="none" stroke-dasharray="10 10"/>
-                        </svg>
-                        <!-- Nodes will be positioned by JS -->
+            <!-- Pre-trip Checklist -->
+            <section id="checklist" class="scroll-mt-16">
+                 <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Booking Timeline & Checklist</h2>
+                 <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">With flights and visas secured, here is the recommended timeline for your remaining bookings to ensure a smooth trip.</p>
+                 <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 material-card">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-red-600">Book ASAP (8-12 Weeks Before)</h3>
+                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
+                                <li><strong>Rental Car:</strong> A 7-seater MPV is a specialty vehicle. Book immediately to guarantee availability and get the best price for a one-way rental.</li>
+                                <li><strong>London & Edinburgh Accommodation:</strong> Prime city apartments for groups are in high demand for July/August. Book your Airbnb now.</li>
+                                <li><strong>West End Theatre Show:</strong> For popular shows like The Lion King or Hamilton, book now for the best choice of seats and dates.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t pt-8">
+                            <h3 class="text-2xl font-bold text-orange-600">Book Soon (4-8 Weeks Before)</h3>
+                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
+                                <li><strong>Key Attractions:</strong> Book timed-entry tickets for Buckingham Palace, Tower of London, Windsor Castle, and Edinburgh Castle. These will sell out.</li>
+                                <li><strong>Rural Accommodation:</strong> Book your stays for the Cotswolds, York, Manchester, and the Scottish Highlands. Unique properties go fast.</li>
+                                <li><strong>Train Tickets:</strong> Book Advance tickets for London-York and York-Edinburgh legs. Fares are significantly cheaper when booked weeks ahead.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t pt-8">
+                            <h3 class="text-2xl font-bold text-green-600">Final Checks (1-2 Weeks Before)</h3>
+                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
+                                <li><strong>Restaurant Reservations:</strong> For any specific high-demand restaurants (e.g., Dishoom), make reservations.</li>
+                                <li><strong>Whisky Distillery Tour:</strong> Book your preferred tour time to avoid disappointment.</li>
+                                <li><strong>Download Itinerary:</strong> Use the button below to get a printable version for offline access.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t pt-8 text-center">
+                             <button id="download-btn" class="inline-flex items-center bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">
+                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                 Download PDF
+                             </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -383,46 +412,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Pre-trip Checklist -->
-            <section id="checklist" class="scroll-mt-16">
-                 <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Booking Timeline & Checklist</h2>
-                 <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">With flights and visas secured, here is the recommended timeline for your remaining bookings to ensure a smooth trip.</p>
-                 <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 material-card">
-                    <div class="space-y-8">
-                        <div>
-                            <h3 class="text-2xl font-bold text-red-600">Book ASAP (8-12 Weeks Before)</h3>
-                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
-                                <li><strong>Rental Car:</strong> A 7-seater MPV is a specialty vehicle. Book immediately to guarantee availability and get the best price for a one-way rental.</li>
-                                <li><strong>London & Edinburgh Accommodation:</strong> Prime city apartments for groups are in high demand for July/August. Book your Airbnb now.</li>
-                                <li><strong>West End Theatre Show:</strong> For popular shows like The Lion King or Hamilton, book now for the best choice of seats and dates.</li>
-                            </ul>
-                        </div>
-                        <div class="border-t pt-8">
-                            <h3 class="text-2xl font-bold text-orange-600">Book Soon (4-8 Weeks Before)</h3>
-                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
-                                <li><strong>Key Attractions:</strong> Book timed-entry tickets for Buckingham Palace, Tower of London, Windsor Castle, and Edinburgh Castle. These will sell out.</li>
-                                <li><strong>Rural Accommodation:</strong> Book your stays for the Cotswolds, York, Manchester, and the Scottish Highlands. Unique properties go fast.</li>
-                                <li><strong>Train Tickets:</strong> Book Advance tickets for London-York and York-Edinburgh legs. Fares are significantly cheaper when booked weeks ahead.</li>
-                            </ul>
-                        </div>
-                        <div class="border-t pt-8">
-                            <h3 class="text-2xl font-bold text-green-600">Final Checks (1-2 Weeks Before)</h3>
-                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
-                                <li><strong>Restaurant Reservations:</strong> For any specific high-demand restaurants (e.g., Dishoom), make reservations.</li>
-                                <li><strong>Whisky Distillery Tour:</strong> Book your preferred tour time to avoid disappointment.</li>
-                                <li><strong>Download Itinerary:</strong> Use the button below to get a printable version for offline access.</li>
-                            </ul>
-                        </div>
-                        <div class="border-t pt-8 text-center">
-                             <button id="download-btn" class="inline-flex items-center bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">
-                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                 Download PDF
-                             </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
     
@@ -432,72 +421,21 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const itineraryData = [
-             { day: 1, date: "Jul 19", dayOfWeek: "Saturday", title: 'Arrival & London Immersion', location: 'London',
-                accommodation: { name: '3-BR Airbnb', type: 'Shoreditch/Bermondsey', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' },
-                schedule: [ 
-                    { time: '07:30', activity: '✈️ Arrive at LHR, clear immigration & baggage.' }, 
-                    { time: '09:00', activity: '🚆 Transfer to Airbnb via Elizabeth Line.' },
-                    { time: '10:30', activity: '짐 Drop luggage at Airbnb.' },
-                    { time: '11:00', activity: '☕ Coffee & Snack at a local cafe.' },
-                    { time: '13:00', activity: '🏨 Official Check-in, unpack, and rest.' },
-                    { time: '15:00', activity: '🚶 Explore local area, head to Borough Market.' },
-                    { time: '18:00', activity: '🍴 Dinner at Borough Market or a local pub.' },
-                    { time: '20:00', activity: '🛋️ Leisure time at Airbnb.' },
-                    { time: '22:00', activity: '🛌 Sleep (combat jet lag).' }
-                ]},
-            { day: 2, date: "Jul 20", dayOfWeek: "Sunday", title: 'Royalty & Politics', location: 'London',
-                accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' },
-                schedule: [ 
-                    { time: '09:00', activity: '🍳 Breakfast at Airbnb.' },
-                    { time: '10:00', activity: '💂 Witness Changing of the Guard at Buckingham Palace.' },
-                    { time: '11:00', activity: '🏰 Tour Buckingham Palace State Rooms (pre-booked).' },
-                    { time: '13:30', activity: '🍴 Lunch near Westminster.' },
-                    { time: '14:30', activity: '🚶 Walking tour: St. James\'s Park, Big Ben, Parliament.' },
-                    { time: '17:30', activity: '🛋️ Rest & refresh at Airbnb.' },
-                    { time: '19:00', activity: '🎭 Attend a West End Theatre Show.' },
-                    { time: '22:30', activity: '🛌 Sleep.' }
-                ]},
-             { day: 5, date: "Jul 23", dayOfWeek: "Wednesday", title: 'The Great Escape', location: 'Cotswolds',
-                accommodation: { name: 'Self-Catering Cottage', type: 'Cotswolds', link: 'https://www.airbnb.co.uk/s/Cotswolds--United-Kingdom/homes?adults=5&checkin=2025-07-23&checkout=2025-07-25' },
-                schedule: [ 
-                    { time: '09:00', activity: '🚗 Pick up rental car from LHR.' },
-                    { time: '11:00', activity: '🏰 Drive to & explore Windsor Castle.' },
-                    { time: '15:30', activity: '🍴 Late lunch in Windsor.' },
-                    { time: '16:30', activity: '🚗 Drive to the Cotswolds.' },
-                    { time: '18:00', activity: '🏞️ Photo stop at Castle Combe village.' },
-                    { time: '19:30', activity: '🏨 Check into cottage and have a pub dinner.' },
-                    { time: '22:00', activity: '🛌 Sleep.' }
-                ]},
-             { day: 8, date: "Jul 26", dayOfWeek: "Saturday", title: 'The Road to Scotland', location: 'Edinburgh',
-                accommodation: { name: '3-BR Airbnb', type: 'New Town/Marchmont', link: 'https://www.airbnb.co.uk/s/Edinburgh--United-Kingdom/homes?adults=5&checkin=2025-07-26&checkout=2025-07-29' },
-                schedule: [ 
-                    { time: '10:00', activity: '🏛️ Explore John Rylands Library in Manchester.' },
-                    { time: '13:00', activity: '🚗 Drive north towards Scotland.' },
-                    { time: '15:30', activity: '🧱 Stop at Hadrian\'s Wall for a historic walk.' },
-                    { time: '19:00', activity: '🏨 Arrive & check into Airbnb in Edinburgh.' },
-                    { time: '20:00', activity: '🍴 Relaxed dinner or takeaway.' },
-                    { time: '22:00', activity: '🛌 Sleep.' }
-                ]},
-             { day: 12, date: "Jul 30", dayOfWeek: "Wednesday", title: 'Monsters & Magic', location: 'Scottish Highlands',
-                accommodation: { name: 'Inverness Hotel/B&B', type: 'Inverness', link: 'https://www.airbnb.co.uk/s/Inverness--United-Kingdom/homes?adults=5&checkin=2025-07-29&checkout=2025-07-31' },
-                schedule: [ 
-                    { time: '08:00', activity: '🏞️ Drive along Loch Ness, optional boat cruise.' },
-                    { time: '10:00', activity: '🏰 Stop at Eilean Donan Castle for photos.' },
-                    { time: '11:30', activity: '⛰️ Arrive on Isle of Skye, explore Portree.' },
-                    { time: '13:00', activity: '🍴 Lunch in Portree.' },
-                    { time: '14:00', activity: '🚗 Scenic drive: Old Man of Storr & The Quiraing.' },
-                    { time: '17:00', activity: '🚗 Begin scenic drive back to Inverness.' },
-                    { time: '19:30', activity: '🏨 Arrive back in Inverness for dinner.' },
-                    { time: '22:00', activity: '🛌 Sleep.' }
-                ]},
-            { day: 15, date: "Aug 2", dayOfWeek: "Saturday", title: 'Homeward Bound', location: 'London',
-                accommodation: { name: 'N/A', type: 'Departure Day', link: '#' },
-                schedule: [ 
-                    { time: '06:00', activity: '🚗 Final drive from hotel to LHR.' },
-                    { time: '06:45', activity: '🚗 Return rental car.' },
-                    { time: '07:00', activity: '✈️ Check-in for flight AI 162.' },
-                    { time: '09:45', activity: '✈️ Depart from London Heathrow (LHR).' }
-                ]},
+            { day: 1, date: "Jul 19", dayOfWeek: "Saturday", title: 'Arrival & London Immersion', location: 'London', temp: '23°C', accommodation: { name: '3-BR Airbnb', type: 'Shoreditch/Bermondsey', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' }, schedule: [ { time: '07:30', activity: '✈️ Arrive at LHR, clear immigration & baggage.' }, { time: '09:00', activity: '🚆 Transfer to Airbnb via Elizabeth Line.' }, { time: '10:30', activity: '짐 Drop luggage at Airbnb.' }, { time: '11:00', activity: '☕ Coffee & Snack at a local cafe.' }, { time: '13:00', activity: '🏨 Official Check-in, unpack, and rest.' }, { time: '15:00', activity: '🚶 Explore local area, head to Borough Market.' }, { time: '18:00', activity: '🍴 Dinner at Borough Market or a local pub.' }, { time: '20:00', activity: '🛋️ Leisure time at Airbnb.' }, { time: '22:00', activity: '🛌 Sleep (combat jet lag).' } ]},
+            { day: 2, date: "Jul 20", dayOfWeek: "Sunday", title: 'Royalty & Politics', location: 'London', temp: '23°C', accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' }, schedule: [ { time: '09:00', activity: '🍳 Breakfast at Airbnb.' }, { time: '10:00', activity: '💂 Witness Changing of the Guard at Buckingham Palace.' }, { time: '11:00', activity: '🏰 Tour Buckingham Palace State Rooms (pre-booked).' }, { time: '13:30', activity: '🍴 Lunch near Westminster.' }, { time: '14:30', activity: '🚶 Walking tour: St. James\'s Park, Big Ben, Parliament.' }, { time: '17:30', activity: '🛋️ Rest & refresh at Airbnb.' }, { time: '19:00', activity: '🎭 Attend a West End Theatre Show.' }, { time: '22:30', activity: '🛌 Sleep.' } ]},
+            { day: 3, date: "Jul 21", dayOfWeek: "Monday", title: 'Towers, Bridges & Views', location: 'London', temp: '23°C', accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' }, schedule: [ { time: '10:00', activity: '🏰 Explore Tower of London & Crown Jewels.' }, { time: '13:00', activity: '🌉 Walk across Tower Bridge.' }, { time: '14:00', activity: '🍴 Lunch at South Bank.' }, { time: '15:00', activity: '🎡 Ride the London Eye (Fast Track recommended).' }, { time: '17:00', activity: '🛋️ Free time.' }, { time: '19:30', activity: '🍴 Dinner at Dishoom or similar.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 4, date: "Jul 22", dayOfWeek: "Tuesday", title: 'Museums & Markets', location: 'London', temp: '23°C', accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' }, schedule: [ { time: '10:00', activity: '🏛️ Visit British Museum or Natural History Museum.' }, { time: '13:00', activity: '🍴 Lunch in South Kensington or Bloomsbury.' }, { time: '14:30', activity: '🛍️ Explore Camden Market for unique finds.' }, { time: '17:00', activity: '🌳 Relax on Primrose Hill for city views.' }, { time: '19:00', activity: '🧳 Pack for morning departure.' }, { time: '20:00', activity: '🍴 Final London dinner.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 5, date: "Jul 23", dayOfWeek: "Wednesday", title: 'The Great Escape', location: 'Cotswolds', temp: '22°C', accommodation: { name: 'Self-Catering Cottage', type: 'Cotswolds', link: 'https://www.airbnb.co.uk/s/Cotswolds--United-Kingdom/homes?adults=5&checkin=2025-07-23&checkout=2025-07-25' }, schedule: [ { time: '09:00', activity: '🚗 Pick up rental car from LHR.' }, { time: '11:00', activity: '🏰 Drive to & explore Windsor Castle.' }, { time: '15:30', activity: '🍴 Late lunch in Windsor.' }, { time: '16:30', activity: '🚗 Drive to the Cotswolds.' }, { time: '18:00', activity: '🏞️ Photo stop at Castle Combe village.' }, { time: '19:30', activity: '🏨 Check into cottage and have a pub dinner.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 6, date: "Jul 24", dayOfWeek: "Thursday", title: 'Quintessential England', location: 'Cotswolds', temp: '22°C', accommodation: { name: 'Cotswolds Cottage', type: 'As above', link: 'https://www.airbnb.co.uk/s/Cotswolds--United-Kingdom/homes?adults=5&checkin=2025-07-23&checkout=2025-07-25' }, schedule: [ { time: '09:30', activity: '🏞️ Explore villages: Bourton-on-the-Water, Lower Slaughter.' }, { time: '13:00', activity: '🍴 Lunch in Stow-on-the-Wold.' }, { time: '14:30', activity: '📜 Drive to Stratford-upon-Avon, see Shakespeare\'s Birthplace.' }, { time: '18:00', activity: '🚗 Return to cottage.' }, { time: '19:30', activity: '🍴 Cook dinner or visit another country pub.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 7, date: "Jul 25", dayOfWeek: "Friday", title: 'Journey to the North', location: 'York', temp: '21°C', accommodation: { name: 'Aparthotel', type: 'Near The Shambles', link: 'https://www.airbnb.co.uk/s/York--United-Kingdom/homes?adults=5&checkin=2025-07-25&checkout=2025-07-27' }, schedule: [ { time: '09:00', activity: '🚗 Drive to Warwick Castle.' }, { time: '10:00', activity: '🏰 Explore Warwick Castle.' }, { time: '13:00', activity: '🚗 Drive towards York.' }, { time: '15:00', activity: '🚆 Alternative: Drive to Birmingham, drop car, take train to York.' }, { time: '18:00', activity: '🏨 Arrive & check into York accommodation.' }, { time: '19:30', activity: '🍴 Dinner in York.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 8, date: "Jul 26", dayOfWeek: "Saturday", title: 'Ancient York', location: 'York', temp: '21°C', accommodation: { name: 'York Aparthotel', type: 'As above', link: 'https://www.airbnb.co.uk/s/York--United-Kingdom/homes?adults=5&checkin=2025-07-25&checkout=2025-07-27' }, schedule: [ { time: '09:30', activity: '⛪ Explore York Minster & climb the tower.' }, { time: '12:00', activity: '🚶 Walk the City Walls.' }, { time: '13:30', activity: '🍴 Lunch at The Shambles Market.' }, { time: '15:00', activity: '🚂 Visit the National Railway Museum.' }, { time: '18:00', activity: '🛋️ Rest.' }, { time: '20:00', activity: '👻 Evening Ghost Tour.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 9, date: "Jul 27", dayOfWeek: "Sunday", title: 'Football & Industry', location: 'Manchester', temp: '20°C', accommodation: { name: 'Serviced Apartment', type: 'Northern Quarter', link: 'https://www.airbnb.co.uk/s/Manchester--United-Kingdom/homes?adults=5&checkin=2025-07-27&checkout=2025-07-28' }, schedule: [ { time: '10:00', activity: '🚆 Train from York to Manchester (~1.5 hours).' }, { time: '12:00', activity: '🏨 Check into Manchester apartment.' }, { time: '13:00', activity: '🍴 Lunch in the Northern Quarter.' }, { time: '14:30', activity: '⚽ Tour Old Trafford or Etihad Stadium.' }, { time: '17:30', activity: '🛋️ Rest and relax.' }, { time: '19:30', activity: '🍻 Dinner and drinks in the vibrant Northern Quarter.' }, { time: '22:30', activity: '🛌 Sleep.' } ]},
+            { day: 10, date: "Jul 28", dayOfWeek: "Monday", title: 'Hello, Scotland!', location: 'Edinburgh', temp: '19°C', accommodation: { name: '3-BR Airbnb', type: 'New Town/Marchmont', link: 'https://www.airbnb.co.uk/s/Edinburgh--United-Kingdom/homes?adults=5&checkin=2025-07-28&checkout=2025-07-31' }, schedule: [ { time: '09:30', activity: '🏛️ Morning in Manchester: John Rylands Library or Football Museum.' }, { time: '12:00', activity: '🚆 Train from Manchester to Edinburgh (~3 hours).' }, { time: '15:30', activity: '🏨 Arrive in Edinburgh, check into Airbnb.' }, { time: '17:00', activity: '🚶 First exploration: Walk up Calton Hill for sunset views.' }, { time: '19:30', activity: '🍴 Dinner in the New Town.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 11, date: "Jul 29", dayOfWeek: "Tuesday", title: 'The Royal Mile', location: 'Edinburgh', temp: '19°C', accommodation: { name: 'Edinburgh Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/Edinburgh--United-Kingdom/homes?adults=5&checkin=2025-07-28&checkout=2025-07-31' }, schedule: [ { time: '10:00', activity: '🏰 Explore Edinburgh Castle (pre-booked).' }, { time: '13:00', activity: '🍴 Lunch on the Royal Mile.' }, { time: '14:30', activity: '🚶 Wander down the Royal Mile, exploring closes.' }, { time: '16:30', activity: '👑 Tour the Palace of Holyroodhouse.' }, { time: '18:30', activity: '⛰️ Optional short hike in Holyrood Park.' }, { time: '20:00', activity: '🍻 Dinner in the Grassmarket area.' }, { time: '22:30', activity: '🛌 Sleep.' } ]},
+            { day: 12, date: "Jul 30", dayOfWeek: "Wednesday", title: 'Into the Highlands', location: 'Glencoe', temp: '16°C', accommodation: { name: 'Hotel or Inn', type: 'Glencoe/Ballachulish', link: 'https://www.airbnb.co.uk/s/Glencoe--Ballachulish--United-Kingdom/homes?adults=5&checkin=2025-07-30&checkout=2025-07-31' }, schedule: [ { time: '09:00', activity: '🚗 Pick up rental car in Edinburgh.' }, { time: '10:00', activity: '🏰 Drive to Stirling, explore Stirling Castle.' }, { time: '13:00', activity: '🍴 Lunch in Stirling.' }, { time: '14:30', activity: '🚗 Drive towards Glencoe via Loch Lomond & Trossachs Park.' }, { time: '17:30', activity: '🏞️ Arrive in Glencoe, check-in.' }, { time: '19:00', activity: '🍴 Dinner at a traditional Highland inn.' }, { time: '21:30', activity: '🛌 Sleep.' } ]},
+            { day: 13, date: "Jul 31", dayOfWeek: "Thursday", title: 'Highland Wonders', location: 'Glencoe', temp: '16°C', accommodation: { name: 'Glencoe Hotel/Inn', type: 'As above', link: 'https://www.airbnb.co.uk/s/Glencoe--Ballachulish--United-Kingdom/homes?adults=5&checkin=2025-07-30&checkout=2025-07-31' }, schedule: [ { time: '09:00', activity: '🥾 Morning hike in Glencoe (e.g., Lost Valley).' }, { time: '13:00', activity: '🍴 Lunch in Glencoe village.' }, { time: '14:30', activity: '🚗 Scenic drive to Glenfinnan Viaduct (Harry Potter bridge).' }, { time: '18:00', activity: '🚗 Return drive to Glencoe.' }, { time: '19:30', activity: '🥃 Relaxed dinner and a whisky tasting.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 14, date: "Aug 1", dayOfWeek: "Friday", title: 'Return to London', location: 'London', temp: '23°C', accommodation: { name: 'Airport Hotel', type: 'Near LHR', link: 'https://www.booking.com/searchresults.html?ss=hotel+near+heathrow+airport' }, schedule: [ { time: '08:00', activity: '🚗 Early start, long drive from Glencoe to London (~8-9 hours).' }, { time: '12:30', activity: '🍴 Stop for lunch near Lake District.' }, { time: '18:00', activity: '🚗 Arrive in London outskirts.' }, { time: '19:00', activity: '🏨 Check into hotel near Heathrow.' }, { time: '20:00', activity: '🍴 Final group dinner.' }, { time: '22:00', activity: '🛌 Sleep.' } ]},
+            { day: 15, date: "Aug 2", dayOfWeek: "Saturday", title: 'Homeward Bound', location: 'London', temp: '23°C', accommodation: { name: 'N/A', type: 'Departure Day', link: '#' }, schedule: [ { time: '06:45', activity: '🚗 Return rental car at LHR.' }, { time: '07:00', activity: '✈️ Check-in for flight AI 162.' }, { time: '09:45', activity: '✈️ Depart from London Heathrow (LHR).' } ]},
         ];
 
          const localEvents = [
@@ -522,7 +460,7 @@
                         <p class="font-semibold text-slate-800 text-xl mt-1">${item.title}</p>
                     </div>
                     <div class="bg-slate-100 px-4 py-2 rounded-lg text-slate-700 font-semibold text-right flex-shrink-0 ml-4">
-                        ${item.location}
+                        ${item.location}<br><span class="text-xs font-normal">${item.temp} Avg</span>
                     </div>
                     <svg class="w-6 h-6 transform transition-transform text-cyan-700 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -599,11 +537,15 @@
         // Custom Cursor
         const cursorDot = document.querySelector(".cursor-dot");
         const cursorOutline = document.querySelector(".cursor-outline");
+        gsap.set(cursorDot, {xPercent: -50, yPercent: -50});
+        gsap.set(cursorOutline, {xPercent: -50, yPercent: -50});
+        
         window.addEventListener("mousemove", function (e) {
             gsap.to(cursorDot, {duration: 0.2, x: e.clientX, y: e.clientY});
             gsap.to(cursorOutline, {duration: 0.6, x: e.clientX, y: e.clientY, ease: "power2.out"});
         });
-        document.querySelectorAll("a, button, .path-node").forEach(el => {
+
+        document.querySelectorAll("a, button").forEach(el => {
             el.addEventListener("mouseenter", () => gsap.to(cursorOutline, {scale: 1.5, duration: 0.3}));
             el.addEventListener("mouseleave", () => gsap.to(cursorOutline, {scale: 1, duration: 0.3}));
         });
@@ -611,30 +553,31 @@
 
         // Interactive Path
         const pathContainer = document.querySelector('.path-container');
-        const path = document.getElementById('route-path');
-        const pathLength = path.getTotalLength();
-        const cities = [
-            { name: 'London', day: 1, pos: 0.1 },
-            { name: 'Cotswolds', day: 5, pos: 0.35 },
-            { name: 'York', day: 7, pos: 0.5 },
-            { name: 'Manchester', day: 9, pos: 0.58 },
-            { name: 'Edinburgh', day: 10, pos: 0.65 },
-            { name: 'Highlands', day: 12, pos: 0.8 },
-            { name: 'London', day: 15, pos: 0.95 }
-        ];
-        cities.forEach(city => {
-            const point = path.getPointAtLength(city.pos * pathLength);
-            const node = document.createElement('div');
-            node.className = 'path-node';
-            node.innerHTML = `Day ${city.day}<br>${city.name}`;
-            node.style.left = `${point.x}px`;
-            node.style.top = `${point.y}px`;
-            node.style.transform = 'translate(-50%, -50%)';
-            node.addEventListener('click', () => {
-                document.getElementById(`day-${city.day}`).scrollIntoView({ behavior: 'smooth' });
+        if (pathContainer) {
+            const cities = [
+                { name: 'London', day: 1, x: '25%', y: '85%' },
+                { name: 'Cotswolds', day: 5, x: '20%', y: '65%' },
+                { name: 'York', day: 7, x: '45%', y: '40%' },
+                { name: 'Manchester', day: 9, x: '35%', y: '35%' },
+                { name: 'Edinburgh', day: 10, x: '55%', y: '15%' },
+                { name: 'Highlands', day: 12, x: '40%', y: '5%' },
+            ];
+            cities.forEach(city => {
+                const node = document.createElement('div');
+                node.className = 'path-node';
+                node.innerHTML = `Day ${city.day}<br>${city.name}`;
+                node.style.left = city.x;
+                node.style.top = city.y;
+                node.style.transform = 'translate(-50%, -50%)';
+                node.addEventListener('click', () => {
+                    const targetElement = document.getElementById(`day-${city.day}`);
+                    if (targetElement) {
+                       targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+                pathContainer.appendChild(node);
             });
-            pathContainer.appendChild(node);
-        });
+        }
 
         // Budget Chart
         const budgetData = {
