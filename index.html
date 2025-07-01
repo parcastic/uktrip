@@ -19,7 +19,12 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
-            cursor: none;
+        }
+        /* Hide default cursor on non-touch devices */
+        @media (pointer: fine) {
+            body, a, button {
+                cursor: none;
+            }
         }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
         
@@ -57,12 +62,11 @@
         .cursor-dot, .cursor-outline {
             pointer-events: none;
             position: fixed;
-            top: 50%;
-            left: 50%;
+            top: 0;
+            left: 0;
             border-radius: 50%;
             opacity: 0;
             transform: translate(-50%, -50%);
-            transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
             z-index: 9999;
         }
         @media (pointer: coarse) {
@@ -77,10 +81,9 @@
             width: 40px;
             height: 40px;
             background-color: rgba(8, 145, 178, 0.2);
+            transition: transform 0.2s ease-out;
         }
         body:hover .cursor-dot, body:hover .cursor-outline { opacity: 1; }
-        a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .path-node:hover ~ .cursor-outline { transform: translate(-50%, -50%) scale(1.5); }
-
 
         /* Parallax Section */
         .parallax-container {
@@ -91,7 +94,7 @@
         .parallax-img {
             width: 100%;
             height: 130%; /* Start larger for zoom effect */
-            background-image: url('https://images.pexels.com/photos/3621168/pexels-photo-3621168.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-image: url('https://images.pexels.com/photos/460672/pexels-photo-460672.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
             background-size: cover;
             background-position: center;
             position: absolute;
@@ -235,18 +238,22 @@
             <section class="parallax-container rounded-xl shadow-2xl">
                 <div class="parallax-img"></div>
                 <div class="parallax-overlay">
-                    <div class="grid grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-6xl mx-auto">
                         <div>
-                            <h3 class="text-4xl md:text-6xl font-bold">1500+</h3>
-                            <p class="text-lg">Miles Driven</p>
+                            <h3 class="text-4xl md:text-6xl font-bold">~20</h3>
+                            <p class="text-lg">Flight Hours</p>
                         </div>
                         <div>
-                            <h3 class="text-4xl md:text-6xl font-bold">7</h3>
-                            <p class="text-lg">Regions Explored</p>
+                            <h3 class="text-4xl md:text-6xl font-bold">~2400</h3>
+                            <p class="text-lg">KMs Travelled</p>
                         </div>
                         <div>
-                            <h3 class="text-4xl md:text-6xl font-bold">15</h3>
-                            <p class="text-lg">Unforgettable Days</p>
+                            <h3 class="text-4xl md:text-6xl font-bold">15+</h3>
+                            <p class="text-lg">Places Covered</p>
+                        </div>
+                        <div>
+                            <h3 class="text-4xl md:text-6xl font-bold">8</h3>
+                            <p class="text-lg">Cities Visited</p>
                         </div>
                     </div>
                 </div>
@@ -254,11 +261,12 @@
 
             <!-- Interactive Path Section -->
             <section id="overview" class="scroll-mt-16">
-                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">The Expedition Path</h2>
+                <h2 class="text-4xl font-bold text-slate-800 mb-2 text-center section-title">The Expedition Path</h2>
+                <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Click any city to jump to that day's itinerary.</p>
                 <div class="bg-white rounded-xl shadow-2xl p-4 md:p-6 material-card">
                     <div class="path-container">
                         <svg class="path-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-                            <path id="route-path" d="M100,500 C150,350 200,200 350,150 C500,100 600,200 650,350 C700,500 700,500 700,500" stroke="#0891b2" stroke-width="4" fill="none" stroke-dasharray="10 10"/>
+                            <path id="route-path" d="M 100 500 Q 150 200, 350 150 T 650 350" stroke="#0891b2" stroke-width="4" fill="none" stroke-dasharray="10 10"/>
                         </svg>
                         <!-- Nodes will be positioned by JS -->
                     </div>
@@ -274,7 +282,7 @@
 
              <!-- Events Section -->
             <section id="events" class="scroll-mt-16">
-                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">July Events to Catch</h2>
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">July & August Events to Catch</h2>
                 <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">Your trip coincides with some fantastic cultural events. Here are a few highlights to consider incorporating into your plan. Book tickets far in advance where possible!</p>
                 <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
@@ -378,24 +386,40 @@
 
             <!-- Pre-trip Checklist -->
             <section id="checklist" class="scroll-mt-16">
-                 <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Pre-Booking & Resources</h2>
-                 <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 material-card">
-                    <div class="space-y-6">
-                        <h3 class="text-2xl font-bold text-cyan-800">Booking Checklist</h3>
-                        <ul class="space-y-4">
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>Flights & Visa</li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>Rental Car (7-Seater MPV)</li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>All Accommodations</li>
-                             <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>Attractions & Tours</li>
-                        </ul>
-                    </div>
-                     <div class="space-y-6">
-                         <h3 class="text-2xl font-bold text-cyan-800">Download Itinerary</h3>
-                         <p class="text-slate-600">Get a printable version of this itinerary to keep handy during your travels.</p>
-                         <button id="download-btn" class="inline-flex items-center bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">
-                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                             Download PDF
-                         </button>
+                 <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Booking Timeline & Checklist</h2>
+                 <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">With flights and visas secured, here is the recommended timeline for your remaining bookings to ensure a smooth trip.</p>
+                 <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 material-card">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-bold text-red-600">Book ASAP (8-12 Weeks Before)</h3>
+                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
+                                <li><strong>Rental Car:</strong> A 7-seater MPV is a specialty vehicle. Book immediately to guarantee availability and get the best price for a one-way rental.</li>
+                                <li><strong>London & Edinburgh Accommodation:</strong> Prime city apartments for groups are in high demand for July/August. Book your Airbnb now.</li>
+                                <li><strong>West End Theatre Show:</strong> For popular shows like The Lion King or Hamilton, book now for the best choice of seats and dates.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t pt-8">
+                            <h3 class="text-2xl font-bold text-orange-600">Book Soon (4-8 Weeks Before)</h3>
+                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
+                                <li><strong>Key Attractions:</strong> Book timed-entry tickets for Buckingham Palace, Tower of London, Windsor Castle, and Edinburgh Castle. These will sell out.</li>
+                                <li><strong>Rural Accommodation:</strong> Book your stays for the Cotswolds, York, Manchester, and the Scottish Highlands. Unique properties go fast.</li>
+                                <li><strong>Train Tickets:</strong> Book Advance tickets for London-York and York-Edinburgh legs. Fares are significantly cheaper when booked weeks ahead.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t pt-8">
+                            <h3 class="text-2xl font-bold text-green-600">Final Checks (1-2 Weeks Before)</h3>
+                            <ul class="mt-4 space-y-4 list-disc list-inside text-slate-700">
+                                <li><strong>Restaurant Reservations:</strong> For any specific high-demand restaurants (e.g., Dishoom), make reservations.</li>
+                                <li><strong>Whisky Distillery Tour:</strong> Book your preferred tour time to avoid disappointment.</li>
+                                <li><strong>Download Itinerary:</strong> Use the button below to get a printable version for offline access.</li>
+                            </ul>
+                        </div>
+                        <div class="border-t pt-8 text-center">
+                             <button id="download-btn" class="inline-flex items-center bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">
+                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                 Download PDF
+                             </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -496,7 +520,9 @@
                         <p class="text-cyan-700 font-bold text-2xl">Day ${item.day}</p>
                         <p class="text-sm text-slate-500">${item.dayOfWeek}, ${item.date}</p>
                         <p class="font-semibold text-slate-800 text-xl mt-1">${item.title}</p>
-                        <p class="text-sm text-slate-600">${item.location}</p>
+                    </div>
+                    <div class="bg-slate-100 px-4 py-2 rounded-lg text-slate-700 font-semibold text-right flex-shrink-0 ml-4">
+                        ${item.location}
                     </div>
                     <svg class="w-6 h-6 transform transition-transform text-cyan-700 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -574,11 +600,14 @@
         const cursorDot = document.querySelector(".cursor-dot");
         const cursorOutline = document.querySelector(".cursor-outline");
         window.addEventListener("mousemove", function (e) {
-            const posX = e.clientX;
-            const posY = e.clientY;
-            gsap.to(cursorDot, {duration: 0.1, x: posX, y: posY});
-            gsap.to(cursorOutline, {duration: 0.4, x: posX, y: posY, ease: "power2.out"});
+            gsap.to(cursorDot, {duration: 0.2, x: e.clientX, y: e.clientY});
+            gsap.to(cursorOutline, {duration: 0.6, x: e.clientX, y: e.clientY, ease: "power2.out"});
         });
+        document.querySelectorAll("a, button, .path-node").forEach(el => {
+            el.addEventListener("mouseenter", () => gsap.to(cursorOutline, {scale: 1.5, duration: 0.3}));
+            el.addEventListener("mouseleave", () => gsap.to(cursorOutline, {scale: 1, duration: 0.3}));
+        });
+
 
         // Interactive Path
         const pathContainer = document.querySelector('.path-container');
@@ -587,7 +616,9 @@
         const cities = [
             { name: 'London', day: 1, pos: 0.1 },
             { name: 'Cotswolds', day: 5, pos: 0.35 },
-            { name: 'Edinburgh', day: 8, pos: 0.65 },
+            { name: 'York', day: 7, pos: 0.5 },
+            { name: 'Manchester', day: 9, pos: 0.58 },
+            { name: 'Edinburgh', day: 10, pos: 0.65 },
             { name: 'Highlands', day: 12, pos: 0.8 },
             { name: 'London', day: 15, pos: 0.95 }
         ];
@@ -596,8 +627,9 @@
             const node = document.createElement('div');
             node.className = 'path-node';
             node.innerHTML = `Day ${city.day}<br>${city.name}`;
-            node.style.left = `${point.x - 40}px`;
-            node.style.top = `${point.y - 40}px`;
+            node.style.left = `${point.x}px`;
+            node.style.top = `${point.y}px`;
+            node.style.transform = 'translate(-50%, -50%)';
             node.addEventListener('click', () => {
                 document.getElementById(`day-${city.day}`).scrollIntoView({ behavior: 'smooth' });
             });
