@@ -3,627 +3,693 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Albion & Caledonia Expedition: A UK Grand Tour</title>
+    <title>UK Grand Tour: 4 Confirmed 1 Waitlist</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Earth & Cool Sky -->
-    <!-- Application Structure Plan: The SPA is designed as a top-down narrative journey. It starts with a high-level visual overview (the map) to orient the user, followed by crucial pre-travel logistics. The core of the app is the interactive day-by-day accordion, which allows users to explore the dense schedule without being overwhelmed. This is followed by a quantitative summary (the budget chart) and actionable resources (checklist). This structure mirrors the natural flow of trip planning: get the big picture, understand the requirements, dive into the details, check the costs, and finally, execute bookings. A sticky navigation bar enables non-linear exploration for users who want to jump to specific sections. -->
-    <!-- Visualization & Content Choices: 
-        - Report Info: Full Trip Route -> Goal: Visualize geographical progression -> Viz: Static map image with CSS-positioned interactive hotspots -> Interaction: Click hotspot to smooth-scroll to the relevant itinerary day -> Justification: Provides immediate spatial context and acts as a visual navigation hub.
-        - Report Info: Detailed daily schedule -> Goal: Organize large volume of sequential data -> Viz: Accordion component -> Interaction: Click to expand/collapse each day -> Justification: Prevents information overload, keeping the UI clean and user-focused.
-        - Report Info: Budget Breakdown -> Goal: Compare expense proportions -> Viz: Donut Chart -> Interaction: Hover for tooltips, button to toggle between 'Per Person' and 'Total Group' costs -> Justification: A chart is more engaging and easier to interpret than a table for proportional data.
-        - Report Info: Key Logistics (Car, Accommodation) -> Goal: Inform critical pre-trip decisions -> Viz: Styled content cards -> Interaction: Static Display -> Justification: Presents vital advice in a clear, digestible format.
-        - Report Info: Booking Checklist -> Goal: Provide an actionable to-do list -> Viz: Styled HTML list -> Interaction: Static display -> Justification: A simple, clean list is the most effective format for a checklist.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body { 
             font-family: 'Inter', sans-serif;
-            background-image: url('https://images.pexels.com/photos/277864/pexels-photo-277864.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
+            background-color: #f8fafc;
+            color: #1e293b;
+            cursor: none;
         }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
-        .content-wrapper > section, .content-wrapper > header, .content-wrapper > main {
-            background-color: rgba(254, 252, 245, 0.95);
-            backdrop-filter: blur(8px);
+        
+        .hero {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
         }
-        .map-hotspot {
-            position: absolute; width: 30px; height: 30px;
-            background-color: rgba(190, 18, 60, 1);
-            border-radius: 50%; border: 2px solid white; cursor: pointer;
-            transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: white; font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        #hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -100;
+            transform: translateX(-50%) translateY(-50%);
+            background-size: cover;
         }
-        .map-hotspot:hover { transform: scale(1.6); z-index: 10; }
-        .map-hotspot .tooltip {
-            visibility: hidden; width: 160px; background-color: #1e293b;
-            color: #fff; text-align: center; border-radius: 6px; padding: 5px 0;
-            position: absolute; z-index: 1; bottom: 150%; left: 50%;
-            margin-left: -80px; opacity: 0; transition: opacity 0.3s;
-            font-size: 0.85rem; pointer-events: none;
+
+        .accordion-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.5s ease-in-out;
         }
-        .map-hotspot:hover .tooltip { visibility: visible; opacity: 1; }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.6s ease-in-out; }
-        .chart-container { position: relative; margin: auto; height: 350px; max-height: 400px; width: 100%; max-width: 400px; }
-        .fade-in-section { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-        .fade-in-section.is-visible { opacity: 1; transform: translateY(0); }
+        .accordion-content > div {
+            overflow: hidden;
+        }
+        .accordion-item.open .accordion-content {
+            grid-template-rows: 1fr;
+        }
+
+        /* Custom Cursor */
+        .cursor-dot, .cursor-outline {
+            pointer-events: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            opacity: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
+            z-index: 9999;
+        }
+        @media (pointer: coarse) {
+            .cursor-dot, .cursor-outline { display: none; }
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #0891b2;
+        }
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(8, 145, 178, 0.2);
+        }
+        body:hover .cursor-dot, body:hover .cursor-outline { opacity: 1; }
+        a:hover ~ .cursor-outline, button:hover ~ .cursor-outline, .path-node:hover ~ .cursor-outline { transform: translate(-50%, -50%) scale(1.5); }
+
+
+        /* Parallax Section */
+        .parallax-container {
+            height: 70vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .parallax-img {
+            width: 100%;
+            height: 130%; /* Start larger for zoom effect */
+            background-image: url('https://images.pexels.com/photos/3621168/pexels-photo-3621168.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            top: -15%;
+        }
+        .parallax-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        /* Interactive Path */
+        .path-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            height: 600px;
+        }
+        .path-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+        .path-node {
+            position: absolute;
+            z-index: 2;
+            background-color: #0891b2;
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .path-node:hover {
+            transform: scale(1.1);
+            background-color: #0e7490;
+        }
         .material-card {
             transition: box-shadow 0.3s ease-in-out;
         }
         .material-card:hover {
             box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
         }
+        .chart-container { position: relative; margin: auto; height: 350px; max-height: 400px; width: 100%; max-width: 400px; }
+        
+        /* Hamburger Menu */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: left 0.3s ease-in-out;
+            z-index: 999;
+        }
+        .mobile-nav.open {
+            left: 0;
+        }
+
     </style>
 </head>
-<body class="bg-amber-50 text-slate-800">
-    <div class="content-wrapper">
-        <nav id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex-shrink-0"><span class="font-bold text-xl text-slate-700">UK Grand Tour</span></div>
-                    <div class="hidden md:block">
-                        <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#overview" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Overview</a>
-                            <a href="#itinerary" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Itinerary</a>
-                            <a href="#events" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Events</a>
-                            <a href="#budget" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Budget</a>
-                            <a href="#conversion" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Utilities</a>
-                            <a href="#logistics" class="text-gray-600 hover:bg-amber-100 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Logistics</a>
-                        </div>
+<body class="bg-slate-50">
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0"><span class="font-bold text-xl text-slate-700">UK Grand Tour</span></div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div id="desktop-nav-links" class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Route</a>
+                        <a href="#itinerary" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Itinerary</a>
+                        <a href="#events" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Events</a>
+                        <a href="#budget" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Budget</a>
+                        <a href="#logistics" class="text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-sm font-medium">Logistics</a>
                     </div>
                 </div>
-            </div>
-        </nav>
-
-        <header class="shadow-sm">
-            <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
-                 <p class="text-sm font-medium text-cyan-700 mb-2">Designed by Parth</p>
-                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900">The Albion & Caledonia Expedition: A UK Grand Tour</h1>
-                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">An epic 16-day road trip through England and Scotland for five adventurers.</p>
-                <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-y-8 text-slate-700 max-w-4xl mx-auto">
-                    <div class="text-center"><div class="text-3xl font-bold">16</div><div class="text-sm">Days</div></div>
-                    <div class="text-center"><div class="text-3xl font-bold">~1,500</div><div class="text-sm">Miles</div></div>
-                    <div class="text-center"><div class="text-3xl font-bold">7+</div><div class="text-sm">Cities & Regions</div></div>
-                    <div class="text-center"><div class="text-3xl font-bold">5</div><div class="text-sm">Types of Stays</div></div>
+                <!-- Hamburger Button -->
+                <div class="md:hidden">
+                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-md text-slate-600 hover:text-white hover:bg-cyan-700 focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-        </header>
+        </div>
+    </nav>
 
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div class="px-4 py-6 sm:px-0 space-y-16">
-
-                <section id="overview" class="scroll-mt-16 fade-in-section">
-                    <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
-                        <h2 class="text-3xl font-bold text-slate-900 mb-4 text-center">The Expedition Route</h2>
-                        <p class="text-center text-slate-600 mb-6 max-w-3xl mx-auto">This interactive map provides a visual overview of your journey. Click any marker to jump to that day's itinerary and see the average temperature for that location.</p>
-                        <div id="map-container" class="relative w-full max-w-4xl mx-auto bg-blue-100 rounded-lg overflow-hidden border-4 border-white shadow-inner">
-                            <div class="map-hotspot" style="top: 80%; left: 60%;" data-scroll-to="#day-1">D1 <span class="tooltip">London (Day 1-4)<br>Avg: 23°C</span></div>
-                            <div class="map-hotspot" style="top: 73%; left: 51%;" data-scroll-to="#day-5">D5 <span class="tooltip">Cotswolds (Day 5-6)<br>Avg: 22°C</span></div>
-                            <div class="map-hotspot" style="top: 48%; left: 55%;" data-scroll-to="#day-7">D7 <span class="tooltip">York (Day 7-8)<br>Avg: 21°C</span></div>
-                            <div class="map-hotspot" style="top: 52%; left: 49%;" data-scroll-to="#day-9">D9 <span class="tooltip">Manchester (Day 9)<br>Avg: 20°C</span></div>
-                            <div class="map-hotspot" style="top: 32%; left: 45%;" data-scroll-to="#day-10">D10<span class="tooltip">Edinburgh (Day 10-12)<br>Avg: 19°C</span></div>
-                            <div class="map-hotspot" style="top: 17%; left: 37%;" data-scroll-to="#day-13">D13<span class="tooltip">Inverness (Day 13-14)<br>Avg: 17°C</span></div>
-                            <div class="map-hotspot" style="top: 18%; left: 22%;" data-scroll-to="#day-14">D14<span class="tooltip">Isle of Skye (Day 14)<br>Avg: 16°C</span></div>
-                            <div class="map-hotspot" style="top: 25%; left: 30%;" data-scroll-to="#day-15">D15<span class="tooltip">Glencoe (Day 15)<br>Avg: 16°C</span></div>
-                            <div class="h-80 sm:h-96 md:h-[500px] w-full"></div>
-                        </div>
-                    </div>
-                </section>
-                
-                <section id="itinerary" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">The Day-by-Day Expedition</h2>
-                    <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">This is your complete 16-day plan. Click any day to expand and see the detailed hourly schedule and accommodation links. For vehicle and driving information, see the <a href="#logistics" class="text-blue-600 font-semibold hover:underline">Logistics Section</a>. Icons: ✈️ Arrival/Departure, 🚗 Drive, 🏰 Attraction, 🏨 Check-in, 🍴 Food, 🛌 Rest.</p>
-                    <div id="accordion-container" class="space-y-2"></div>
-                </section>
-
-                <section id="events" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">July Events to Catch</h2>
-                    <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Your trip coincides with some fantastic cultural events. Here are a few highlights to consider incorporating into your plan. Book tickets far in advance where possible!</p>
-                    <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                </section>
-
-                <section id="budget" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Expedition Budget Breakdown</h2>
-                    <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">This chart visualizes the estimated mid-range budget. Hover over segments for details and use the button to toggle between per-person and group totals.</p>
-                    <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 material-card">
-                        <div class="chart-container"><canvas id="budgetChart"></canvas></div>
-                        <div class="text-center mt-6">
-                            <button id="toggleBudgetBtn" class="bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">Show Total Group Budget</button>
-                            <p id="budgetText" class="mt-4 text-lg font-semibold text-slate-700"></p>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="conversion" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Conversion Utilities</h2>
-                    <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Quick tools to help you convert currency and distance during your trip planning.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 material-card">
-                            <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Currency Converter</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="gbp-input" class="block text-sm font-medium text-slate-700">Pounds (£)</label>
-                                    <input type="number" id="gbp-input" placeholder="Enter amount in GBP" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-                                </div>
-                                <div>
-                                    <label for="inr-input" class="block text-sm font-medium text-slate-700">Rupees (₹)</label>
-                                    <input type="number" id="inr-input" placeholder="Enter amount in INR" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 material-card">
-                            <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Distance Converter</h3>
-                             <div class="space-y-4">
-                                <div>
-                                    <label for="miles-input" class="block text-sm font-medium text-slate-700">Miles (mi)</label>
-                                    <input type="number" id="miles-input" placeholder="Enter distance in miles" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-                                </div>
-                                <div>
-                                    <label for="km-input" class="block text-sm font-medium text-slate-700">Kilometers (km)</label>
-                                    <input type="number" id="km-input" placeholder="Enter distance in kilometers" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="flights" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Book Your Flights</h2>
-                    <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto material-card">
-                         <p class="text-center text-slate-600 mb-6">Check real-time flight prices for your trip. Click the buttons below to open MakeMyTrip with your travel dates and routes pre-filled.</p>
-                         <div class="flex flex-col md:flex-row justify-center gap-4">
-                             <a href="https://www.makemytrip.com/flights/flight-search?itinerary=DEL-LHR-13/07/2025&tripType=O&paxType=A-5_C-0_I-0&intl=true" target="_blank" rel="noopener noreferrer" class="flex-1 text-center bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg">
-                                Delhi → London <br><span class="text-sm font-normal">(July 13, 2025)</span>
-                            </a>
-                             <a href="https://www.makemytrip.com/flights/flight-search?itinerary=EDI-DEL-28/07/2025&tripType=O&paxType=A-5_C-0_I-0&intl=true" target="_blank" rel="noopener noreferrer" class="flex-1 text-center bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-all shadow-md hover:shadow-lg">
-                                Edinburgh → Delhi <br><span class="text-sm font-normal">(July 28, 2025)</span>
-                            </a>
-                         </div>
-                    </div>
-                </section>
-
-                <section id="logistics" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">The Expedition Blueprint: Logistics</h2>
-                    <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 space-y-8 material-card">
-                        <div>
-                            <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Vehicle: The People Carrier</h3>
-                            <p class="text-slate-600 text-center max-w-3xl mx-auto mb-6">For 5 adults with large luggage, a 7-seater MPV or 9-seater van is essential. A standard SUV will not have enough boot space. Below are the best options to ensure comfort.</p>
-                             <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse">
-                                    <thead class="bg-slate-50">
-                                        <tr>
-                                            <th class="border-b-2 p-4">Class</th>
-                                            <th class="border-b-2 p-4">Example Models</th>
-                                            <th class="border-b-2 p-4">Pros</th>
-                                            <th class="border-b-2 p-4">Cons</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="hover:bg-amber-100">
-                                            <td class="p-4 border-b font-semibold">7-Seater MPV<br><span class="font-normal text-red-600">(Recommended)</span></td>
-                                            <td class="p-4 border-b">Ford Galaxy, VW Sharan</td>
-                                            <td class="p-4 border-b">Perfect balance. Comfort for 5 and huge boot space (~700L) for all luggage. Easy to drive.</td>
-                                            <td class="p-4 border-b">Must book this specific class.</td>
-                                        </tr>
-                                        <tr class="hover:bg-amber-100">
-                                            <td class="p-4 border-b font-semibold">9-Seater Van</td>
-                                            <td class="p-4 border-b">Ford Tourneo, VW Transporter</td>
-                                            <td class="p-4 border-b">Unbeatable space for passengers and luggage. Very comfortable.</td>
-                                            <td class="p-4 border-b">Can be difficult to park and navigate on very narrow country lanes.</td>
-                                        </tr>
-                                        <tr class="hover:bg-amber-100">
-                                            <td class="p-4 border-b font-semibold">Large SUV<br><span class="font-normal text-gray-500">(Not Recommended)</span></td>
-                                            <td class="p-4 border-b">Volvo XC90, Land Rover Discovery</td>
-                                            <td class="p-4 border-b">Good road presence and style.</td>
-                                            <td class="p-4 border-b">Luggage space is severely insufficient for 5 large bags. Would be very cramped.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                         <div class="border-t pt-8">
-                            <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Driving & Accommodation</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                 <div class="bg-amber-50 rounded-lg shadow-md p-6 material-card"><h3 class="font-bold text-xl mb-3 text-cyan-800">Driving: Key UK Rules</h3><p class="text-slate-600">Your Indian licence is valid for 12 months. Remember: <strong>Drive on the LEFT</strong>, roundabouts flow CLOCKWISE (give way to your right), and speed limits are in MPH.</p></div>
-                                 <div class="bg-amber-50 rounded-lg shadow-md p-6 material-card"><h3 class="font-bold text-xl mb-3 text-cyan-800">Accommodation: Hybrid Strategy</h3><p class="text-slate-600">A mix of lodging optimizes cost and experience. Use large Airbnbs for city bases (London, Edinburgh), and authentic cottages or inns in scenic areas like the Cotswolds and Highlands.</p></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="checklist" class="scroll-mt-16 fade-in-section">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6 text-center">Pre-Booking & Resources</h2>
-                    <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 material-card">
-                        <ul class="space-y-4">
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><div><strong class="text-slate-800">Flights & Visa:</strong> Book flights via links above and apply for UK Visitor Visa immediately.</div></li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><div><strong class="text-slate-800">Rental Car:</strong> Book a 7-seater MPV (one-way LHR to EDI).</div></li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><div><strong class="text-slate-800">Accommodation:</strong> Book all stays via the links in the itinerary.</div></li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><div><strong class="text-slate-800">London Attractions:</strong> Book timed tickets for Buckingham Palace, Tower of London, and London Eye. Book your West End show.</div></li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><div><strong class="text-slate-800">Other Attractions:</strong> Book timed tickets for Windsor Castle and Edinburgh Castle.</div></li>
-                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">✓</span><div><strong class="text-slate-800">Tours & Events:</strong> Book Whisky Distillery tour and any festival tickets in advance.</div></li>
-                        </ul>
-                        <div class="mt-6 border-t pt-4 text-center text-slate-600"><strong>Emergency Number in UK:</strong> Dial <strong>999</strong> or <strong>112</strong>.</div>
-                    </div>
-                </section>
-            </div>
-        </main>
-        
-        <footer class="bg-slate-800 text-white mt-16"><div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm"><p>&copy; 2025 The Albion & Caledonia Expedition. Itinerary created by Parth. Have an unforgettable journey!</p></div></footer>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-nav shadow-2xl">
+        <div class="p-5">
+            <a href="#overview" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Route</a>
+            <a href="#itinerary" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Itinerary</a>
+            <a href="#events" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Events</a>
+            <a href="#budget" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Budget</a>
+            <a href="#logistics" class="block text-gray-600 hover:text-cyan-700 px-3 py-2 rounded-md text-base font-medium">Logistics</a>
+        </div>
     </div>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const GBP_TO_INR_RATE = 105.5;
-    const MILES_TO_KM_RATE = 1.60934;
 
-    const itineraryData = [
-        { day: 1, id: 'day-1', date: 'July 13', dayOfWeek: 'Sunday', title: 'Arrival and Immersion', location: 'London',
-            accommodation: { name: '3-BR Airbnb', type: 'Shoreditch/Bermondsey', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-13&checkout=2025-07-17&tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&query=London&place_id=ChIJdd4hrwug2EcRmSrV3Vo6llI&search_type=search_query&room_types%5B%5D=Entire%20home%2Fapt&min_bedrooms=3' },
-            schedule: [
-                { time: '08:00-10:00', activity: '✈️ Arrive at LHR, clear immigration & baggage.' },
-                { time: '10:00-11:30', activity: '🚆 Transfer to Airbnb via Elizabeth Line.' },
-                { time: '13:00-15:00', activity: '🏨 Check-in, unpack, and rest.' },
-                { time: '15:00-18:00', activity: '🚶 Explore local area, visit Borough Market.' },
-                { time: '18:00-20:00', activity: '🍴 Dinner at Borough Market or a local pub.' },
-                { time: '20:00-22:00', activity: '🛋️ Leisure time at Airbnb.' },
-                { time: '22:00 onwards', activity: '🛌 Sleep (combat jet lag).' },
-            ]},
-        { day: 2, id: 'day-2', date: 'July 14', dayOfWeek: 'Monday', title: 'A Royal & Political Affair', location: 'London',
-            accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-13&checkout=2025-07-17' },
-            schedule: [
-                { time: '10:00-10:45', activity: '💂 Witness Changing of the Guard at Buckingham Palace.' },
-                { time: '11:00-13:30', activity: '🏰 Tour Buckingham Palace State Rooms (pre-booked).' },
-                { time: '14:30-17:30', activity: '🚶 Walking tour: St. James\'s Park, Westminster Abbey, Big Ben.' },
-                { time: '17:30-19:00', activity: '🛋️ Rest & refresh at Airbnb.' },
-                { time: '19:00-22:30', activity: '🎭 Attend a West End Theatre Show (pre-booked).' },
-                { time: '22:30 onwards', activity: '🛌 Sleep.' },
-            ]},
-        { day: 3, id: 'day-3', date: 'July 15', dayOfWeek: 'Tuesday', title: 'Towers, Bridges & Views', location: 'London',
-             accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-13&checkout=2025-07-17' },
-            schedule: [
-                { time: '10:00-13:00', activity: '🏰 Explore Tower of London & Crown Jewels (pre-booked).' },
-                { time: '13:00-14:00', activity: '🌉 Walk across the iconic Tower Bridge.' },
-                { time: '15:00-16:00', activity: '🎡 Ride the London Eye (Fast Track tickets pre-booked).' },
-                { time: '16:00-18:00', activity: '🛋️ Leisure time / Walk along South Bank.' },
-                { time: '19:30-21:30', activity: '🍴 Curated Indian Dinner (e.g., Dishoom, Tayyabs).' },
-                { time: '21:30 onwards', activity: '🛌 Sleep.' },
-            ]},
-        { day: 4, id: 'day-4', date: 'July 16', dayOfWeek: 'Wednesday', title: 'Culture & Road Trip Prep', location: 'London',
-             accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-13&checkout=2025-07-17' },
-            schedule: [
-                { time: '10:00-13:00', activity: '🏛️ Museum visit (British Museum or Natural History Museum).' },
-                { time: '14:00-18:00', activity: '🛍️ Flexible Afternoon: Shopping or explore Notting Hill.' },
-                { time: '18:00-19:30', activity: '🧳 Pack and prepare for the road trip.' },
-                { time: '19:30-21:00', activity: '🍴 Final London dinner.' },
-                { time: '21:00 onwards', activity: '🛌 Sleep.' },
-            ]},
-        { day: 5, id: 'day-5', date: 'July 17', dayOfWeek: 'Thursday', title: 'The Great Escape', location: 'London to Cotswolds',
-            accommodation: { name: 'Self-Catering Cottage', type: 'Cotswolds', link: 'https://www.airbnb.co.uk/s/Cotswolds--United-Kingdom/homes?adults=5&checkin=2025-07-17&checkout=2025-07-19' },
-            schedule: [
-                { time: '09:00-11:30', activity: '🚗 Collect rental MPV from Heathrow Airport.' },
-                { time: '12:30-15:30', activity: '🏰 Explore Windsor Castle (pre-booked).' },
-                { time: '16:00-17:30', activity: '🚗 Drive to the Cotswolds.' },
-                { time: '17:30-18:30', activity: '🏞️ Photo stop at Castle Combe village.' },
-                { time: '19:00 onwards', activity: '🏨 Check into cottage and have a pub dinner.' },
-                { time: '22:00 onwards', activity: '🛌 Sleep.' },
-            ]},
-        { day: 6, id: 'day-6', date: 'July 18', dayOfWeek: 'Friday', title: 'Cotswolds & Shakespeare', location: 'Cotswolds',
-            accommodation: { name: 'Cotswolds Cottage', type: 'As above', link: 'https://www.airbnb.co.uk/s/Cotswolds--United-Kingdom/homes?adults=5&checkin=2025-07-17&checkout=2025-07-19' },
-            schedule: [
-                { time: '09:30-13:00', activity: '🏞️ Explore Cotswolds villages: Bourton-on-the-Water, Lower Slaughter.' },
-                { time: '13:00-14:45', activity: '🍴 Lunch in Stow-on-the-Wold.' },
-                { time: '14:45-17:30', activity: '📜 Explore Stratford-upon-Avon, Shakespeare\'s Birthplace.' },
-                { time: '17:30-18:30', activity: '🚗 Drive back to cottage.' },
-                { time: '18:30 onwards', activity: '🛋️ Relax, cook dinner at the cottage or visit a local pub.' },
-            ]},
-        { day: 7, id: 'day-7', date: 'July 19', dayOfWeek: 'Saturday', title: 'Northward to York', location: 'Cotswolds to York',
-            accommodation: { name: 'Private Hostel Dorm / Aparthotel', type: 'York', link: 'https://www.booking.com/searchresults.html?ss=York&ssne=York&ssne_untouched=York&label=gog235jc-1DCAEoggI46AdIM1gDaKEBiAEBmAExuAEXyAEM2AEB6AEB-AECiAIBqAIDuALJgPrsBsACAdICJGE4ZjkyYWQ5LWEzNDYtNDQ1OS05MmZkLWE1YTY1OTFhYTRiNNgCBOACAQ&sid=1a9a2e6f4a37c35817c13a0c647b744d&aid=397594&lang=en-us&sb=1&src_elem=sb&src=searchresults&dest_id=-2612822&dest_type=city&checkin=2025-07-19&checkout=2025-07-21&group_adults=5&no_rooms=1&group_children=0' },
-            schedule: [
-                { time: '08:30-11:00', activity: '🚗 Drive to Peak District National Park.' },
-                { time: '11:00-13:30', activity: '🍰 Visit Bakewell (try the tart!) and see Chatsworth House exterior.' },
-                { time: '13:30-14:30', activity: '🍴 Lunch in Bakewell.' },
-                { time: '14:30-16:00', activity: '🚗 Drive to the historic city of York.' },
-                { time: '16:00 onwards', activity: '🏨 Check into hostel/apartment and evening walk.' },
-            ]},
-        { day: 8, id: 'day-8', date: 'July 20', dayOfWeek: 'Sunday', title: 'Ancient York', location: 'York',
-            accommodation: { name: 'York Hostel/Apartment', type: 'As above', link: '#' },
-            schedule: [
-                { time: '09:30-12:00', activity: '⛪ Explore York Minster and walk the ancient City Walls.' },
-                { time: '12:00-14:00', activity: '🚶 Wander The Shambles, lunch at Shambles Market.' },
-                { time: '14:00-16:30', activity: '🚂 Visit the National Railway Museum (free).' },
-                { time: '16:30-19:00', activity: '🛋️ Downtime.' },
-                { time: '20:30-22:00', activity: '👻 Take an entertaining evening Ghost Tour.' },
-            ]},
-        { day: 9, id: 'day-9', date: 'July 21', dayOfWeek: 'Monday', title: 'Industrial & Football Hub', location: 'York to Manchester',
-            accommodation: { name: 'Serviced Apartment', type: 'Northern Quarter', link: 'https://www.booking.com/searchresults.html?ss=Manchester&ssne=Manchester&ssne_untouched=Manchester&label=gog235jc-1DCAEoggI46AdIM1gDaKEBiAEBmAExuAEXyAEM2AEB6AEB-AECiAIBqAIDuALJgPrsBsACAdICJGE4ZjkyYWQ5LWEzNDYtNDQ1OS05MmZkLWE1YTY1OTFhYTRiNNgCBOACAQ&sid=1a9a2e6f4a37c35817c13a0c647b744d&aid=397594&lang=en-us&sb=1&src_elem=sb&src=searchresults&dest_id=-2602512&dest_type=city&checkin=2025-07-21&checkout=2025-07-22&group_adults=5&no_rooms=1&group_children=0' },
-            schedule: [
-                { time: '11:00-12:30', activity: '🚗 Drive to Manchester.' },
-                { time: '14:00-17:30', activity: '⚽ Football Afternoon: Tour Old Trafford or Etihad Stadium.' },
-                { time: '17:30-19:30', activity: '🛋️ Rest & refresh at apartment.' },
-                { time: '19:30 onwards', activity: '🍻 Dinner and drinks in the trendy Northern Quarter.' },
-            ]},
-        { day: 10, id: 'day-10', date: 'July 22', dayOfWeek: 'Tuesday', title: 'Road to Scotland', location: 'Manchester to Edinburgh',
-            accommodation: { name: '3-BR Airbnb', type: 'New Town/Marchmont', link: 'https://www.airbnb.co.uk/s/Edinburgh--United-Kingdom/homes?adults=5&checkin=2025-07-22&checkout=2025-07-25&tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&query=Edinburgh%2C%20UK&place_id=ChIJIyaYpQC4h0gRJC7I3_21q2o&search_type=search_query&room_types%5B%5D=Entire%20home%2Fapt&min_bedrooms=3' },
-            schedule: [
-                { time: '10:00-12:30', activity: '🏛️ Explore John Rylands Library or People\'s History Museum.' },
-                { time: '13:00-17:30', activity: '🚗 Drive to Edinburgh, with a stop at Hadrian\'s Wall.' },
-                { time: '19:00 onwards', activity: '🏨 Check into Edinburgh Airbnb for 3 nights.' },
-            ]},
-        { day: 11, id: 'day-11', date: 'July 23', dayOfWeek: 'Wednesday', title: 'Royal Mile & Old Town', location: 'Edinburgh',
-            accommodation: { name: 'Edinburgh Airbnb', type: 'As above', link: '#' },
-            schedule: [
-                { time: '10:00-13:00', activity: '🏰 Explore Edinburgh Castle (pre-booked), see the One o\'Clock Gun.' },
-                { time: '14:00-17:00', activity: '🚶 Walk the Royal Mile, visit St. Giles\' Cathedral.' },
-                { time: '17:00-18:30', activity: '🏰 Tour the Palace of Holyroodhouse.' },
-                { time: '20:00 onwards', activity: '🍻 Dinner and drinks in the historic Grassmarket area.' },
-            ]},
-        { day: 12, id: 'day-12', date: 'July 24', dayOfWeek: 'Thursday', title: 'Hikes, Views & New Town', location: 'Edinburgh',
-            accommodation: { name: 'Edinburgh Airbnb', type: 'As above', link: '#' },
-            schedule: [
-                { time: '09:30-12:00', activity: '⛰️ Hike up Arthur\'s Seat for panoramic city views.' },
-                { time: '13:30-17:00', activity: '🚶 Explore the Georgian New Town and walk up Calton Hill.' },
-                { time: '17:00-19:00', activity: '🛋️ Free time for shopping or relaxing.' },
-                { time: '19:00 onwards', activity: '🍴 Farewell Edinburgh dinner with Scottish cuisine.' },
-            ]},
-        { day: 13, id: 'day-13', date: 'July 25', dayOfWeek: 'Friday', title: 'Into the Highlands', location: 'Edinburgh to Inverness',
-            accommodation: { name: 'Hotel/B&B', type: 'Inverness', link: 'https://www.booking.com/searchresults.html?ss=Inverness&ssne=Inverness&ssne_untouched=Inverness&label=gog235jc-1DCAEoggI46AdIM1gDaKEBiAEBmAExuAEXyAEM2AEB6AEB-AECiAIBqAIDuALJgPrsBsACAdICJGE4ZjkyYWQ5LWEzNDYtNDQ1OS05MmZkLWE1YTY1OTFhYTRiNNgCBOACAQ&sid=1a9a2e6f4a37c35817c13a0c647b744d&aid=397594&lang=en-us&sb=1&src_elem=sb&src=searchresults&dest_id=-2599187&dest_type=city&checkin=2025-07-25&checkout=2025-07-27&group_adults=5&no_rooms=1&group_children=0' },
-            schedule: [
-                { time: '09:00-11:00', activity: '🚗 Drive north, stop in Pitlochry.' },
-                { time: '12:30-14:30', activity: '🥃 Scotch Whisky Distillery Tour (e.g., Tomatin, pre-booked).' },
-                { time: '15:30 onwards', activity: '🏨 Drive to Inverness and check into hotel/B&B for 2 nights.' },
-            ]},
-        { day: 14, id: 'day-14', date: 'July 26', dayOfWeek: 'Saturday', title: 'Monsters & Magic', location: 'Loch Ness & Skye Day Trip',
-            accommodation: { name: 'Inverness Hotel/B&B', type: 'As above', link: '#' },
-            schedule: [
-                { time: '08:00-09:30', activity: '🏞️ Drive along Loch Ness, optional boat cruise.' },
-                { time: '09:30-11:30', activity: '🚗 Drive to Skye, stopping at Eilean Donan Castle.' },
-                { time: '11:30-16:30', activity: '⛰️ Explore Skye: Portree, Old Man of Storr, The Quiraing.' },
-                { time: '16:30-19:00', activity: '🚗 Long, scenic drive back to Inverness.' },
-            ]},
-        { day: 15, id: 'day-15', date: 'July 27', dayOfWeek: 'Sunday', title: 'Majestic Glencoe', location: 'Inverness to Glencoe',
-             accommodation: { name: 'Hotel or Inn', type: 'Glencoe/Ballachulish', link: 'https://www.booking.com/searchresults.html?ss=Glencoe&ssne=Glencoe&ssne_untouched=Glencoe&label=gog235jc-1DCAEoggI46AdIM1gDaKEBiAEBmAExuAEXyAEM2AEB6AEB-AECiAIBqAIDuALJgPrsBsACAdICJGE4ZjkyYWQ5LWEzNDYtNDQ1OS05MmZkLWE1YTY1OTFhYTRiNNgCBOACAQ&sid=1a9a2e6f4a37c35817c13a0c647b744d&aid=397594&lang=en-us&sb=1&src_elem=sb&src=searchresults&dest_id=-2597159&dest_type=city&checkin=2025-07-27&checkout=2025-07-28&group_adults=5&no_rooms=1&group_children=0' },
-             schedule: [
-                { time: '10:00-12:30', activity: '🚗 Drive south, stop at Commando Memorial.' },
-                { time: '13:30-14:00', activity: '🚗 Drive into the dramatic valley of Glencoe.' },
-                { time: '14:00-17:00', activity: '🥾 Afternoon Hike: Choose a trail like the Lost Valley.' },
-                { time: '19:00 onwards', activity: '🍻 Final expedition dinner at a traditional Highland Inn.' },
-            ]},
-        { day: 16, id: 'day-16', date: 'July 28', dayOfWeek: 'Monday', title: 'Homeward Bound', location: 'Glencoe to Edinburgh Airport',
-             accommodation: { name: 'N/A', type: 'Departure Day', link: '#' },
-             schedule: [
-                { time: '08:00-12:00', activity: '🚗 Leisurely drive from Glencoe to Edinburgh Airport via Stirling.' },
-                { time: '12:00-13:00', activity: '🚗 Return rental car at Edinburgh Airport (EDI).' },
-                { time: 'Afternoon', activity: '✈️ Check-in for return flight from EDI to New Delhi.' },
-            ]},
-    ];
+    <!-- Hero Section -->
+    <header class="hero flex flex-col items-center justify-center text-white">
+        <video autoplay loop muted playsinline id="hero-video">
+            <source src="https://videos.pexels.com/video-files/1721294/1721294-hd_1920_1080_25fps.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative text-center z-10 p-4">
+            <h1 class="text-5xl md:text-7xl font-bold">UK Grand Tour: 4 Confirmed 1 Waitlist</h1>
+            <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-slate-200">An Immersive 15-Day Expedition | July 19th - August 2nd</p>
+        </div>
+        <div class="absolute bottom-10 text-white z-10">
+             <svg class="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </header>
 
-    const localEvents = [
-        { city: 'London', event: 'Buckingham Palace Summer Opening', description: 'Tour the magnificent State Rooms at the King\'s official London residence. Open for a limited time each summer.', date: 'Until 28 July'},
-        { city: 'London', event: 'Regent\'s Park Open Air Theatre', description: 'Enjoy classic plays and musicals under the stars in one of London\'s most beautiful parks.', date: 'Throughout July'},
-        { city: 'London', event: 'Zoo Nights at London Zoo', description: 'An adults-only evening event with street food, music, and a chance to see the animals after hours.', date: 'Friday evenings in July'},
-        { city: 'York', event: 'Yorkshire Fringe Festival', description: 'Catch comedy, theatre, and music acts in pop-up venues across the city in the run-up to the Edinburgh Fringe.', date: 'Late July'},
-        { city: 'Manchester', event: 'Sounds of the City', description: 'A series of major open-air concerts at Castlefield Bowl, featuring world-renowned headline acts.', date: 'Throughout July'},
-        { city: 'Edinburgh', event: 'Edinburgh Jazz & Blues Festival', description: 'Catch the start of Edinburgh\'s festival season with groovy tunes and soulful music at venues across the city.', date: 'Mid-to-late July'}
-    ];
+    <main class="bg-slate-50">
+        <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-24">
 
-    const accordionContainer = document.getElementById('accordion-container');
-    itineraryData.forEach(item => {
-        const section = document.createElement('div');
-        section.id = item.id;
-        section.className = 'bg-white rounded-lg shadow-lg overflow-hidden scroll-mt-20 fade-in-section material-card';
-        
-        const header = document.createElement('button');
-        header.className = 'accordion-header w-full text-left p-4 flex justify-between items-center bg-gray-50 hover:bg-amber-100 transition-colors';
-        header.innerHTML = `
-            <div class="flex items-center">
-                <div class="text-center w-24">
-                    <div class="text-cyan-700 font-bold">Day ${item.day}</div>
-                    <div class="text-xs text-slate-500">${item.dayOfWeek}, ${item.date}</div>
+            <!-- Parallax Section -->
+            <section class="parallax-container rounded-xl shadow-2xl">
+                <div class="parallax-img"></div>
+                <div class="parallax-overlay">
+                    <div class="grid grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
+                        <div>
+                            <h3 class="text-4xl md:text-6xl font-bold">1500+</h3>
+                            <p class="text-lg">Miles Driven</p>
+                        </div>
+                        <div>
+                            <h3 class="text-4xl md:text-6xl font-bold">7</h3>
+                            <p class="text-lg">Regions Explored</p>
+                        </div>
+                        <div>
+                            <h3 class="text-4xl md:text-6xl font-bold">15</h3>
+                            <p class="text-lg">Unforgettable Days</p>
+                        </div>
+                    </div>
                 </div>
-                <span class="font-semibold text-slate-800 ml-4">${item.title}</span>
-            </div>
-            <div class="flex items-center">
-                <span class="text-sm text-slate-500 mr-4 hidden sm:block">${item.location}</span>
-                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-        `;
+            </section>
+
+            <!-- Interactive Path Section -->
+            <section id="overview" class="scroll-mt-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">The Expedition Path</h2>
+                <div class="bg-white rounded-xl shadow-2xl p-4 md:p-6 material-card">
+                    <div class="path-container">
+                        <svg class="path-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                            <path id="route-path" d="M100,500 C150,350 200,200 350,150 C500,100 600,200 650,350 C700,500 700,500 700,500" stroke="#0891b2" stroke-width="4" fill="none" stroke-dasharray="10 10"/>
+                        </svg>
+                        <!-- Nodes will be positioned by JS -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Itinerary Section -->
+            <section id="itinerary" class="scroll-mt-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Day-by-Day Expedition</h2>
+                <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">This is your complete 15-day plan. Click any day to expand and see the detailed hourly schedule and location highlights.</p>
+                <div id="accordion-container" class="space-y-4"></div>
+            </section>
+
+             <!-- Events Section -->
+            <section id="events" class="scroll-mt-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">July Events to Catch</h2>
+                <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">Your trip coincides with some fantastic cultural events. Here are a few highlights to consider incorporating into your plan. Book tickets far in advance where possible!</p>
+                <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </section>
+
+            <!-- Budget Section -->
+            <section id="budget" class="scroll-mt-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Expedition Budget Breakdown</h2>
+                <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">This chart visualizes the estimated mid-range budget. Hover over segments for details and use the button to toggle between per-person and group totals.</p>
+                <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 material-card">
+                    <div class="chart-container"><canvas id="budgetChart"></canvas></div>
+                    <div class="text-center mt-6">
+                        <button id="toggleBudgetBtn" class="bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">Show Total Group Budget</button>
+                        <p id="budgetText" class="mt-4 text-lg font-semibold text-slate-700"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conversion Utilities Section -->
+            <section id="conversion" class="scroll-mt-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Conversion Utilities</h2>
+                <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">Quick tools to help you convert currency and distance during your trip planning.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 material-card">
+                        <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Currency Converter</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="gbp-input" class="block text-sm font-medium text-slate-700">Pounds (£)</label>
+                                <input type="number" id="gbp-input" placeholder="Enter amount in GBP" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            </div>
+                            <div>
+                                <label for="inr-input" class="block text-sm font-medium text-slate-700">Rupees (₹)</label>
+                                <input type="number" id="inr-input" placeholder="Enter amount in INR" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 material-card">
+                        <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Distance Converter</h3>
+                         <div class="space-y-4">
+                            <div>
+                                <label for="miles-input" class="block text-sm font-medium text-slate-700">Miles (mi)</label>
+                                <input type="number" id="miles-input" placeholder="Enter distance in miles" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            </div>
+                            <div>
+                                <label for="km-input" class="block text-sm font-medium text-slate-700">Kilometers (km)</label>
+                                <input type="number" id="km-input" placeholder="Enter distance in kilometers" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logistics Section -->
+            <section id="logistics" class="scroll-mt-16">
+                <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">The Expedition Blueprint: Logistics</h2>
+                <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 space-y-8 material-card">
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Vehicle: The People Carrier</h3>
+                        <p class="text-slate-600 text-center max-w-3xl mx-auto mb-6">For 5 adults with large luggage, a 7-seater MPV or 9-seater van is essential. A standard SUV will not have enough boot space. Below are the best options to ensure comfort.</p>
+                         <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="border-b-2 p-4">Class</th>
+                                        <th class="border-b-2 p-4">Example Models</th>
+                                        <th class="border-b-2 p-4">Pros</th>
+                                        <th class="border-b-2 p-4">Cons</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="hover:bg-amber-100">
+                                        <td class="p-4 border-b font-semibold">7-Seater MPV<br><span class="font-normal text-red-600">(Recommended)</span></td>
+                                        <td class="p-4 border-b">Ford Galaxy, VW Sharan</td>
+                                        <td class="p-4 border-b">Perfect balance. Comfort for 5 and huge boot space (~700L) for all luggage. Easy to drive.</td>
+                                        <td class="p-4 border-b">Must book this specific class.</td>
+                                    </tr>
+                                    <tr class="hover:bg-amber-100">
+                                        <td class="p-4 border-b font-semibold">9-Seater Van</td>
+                                        <td class="p-4 border-b">Ford Tourneo, VW Transporter</td>
+                                        <td class="p-4 border-b">Unbeatable space for passengers and luggage. Very comfortable.</td>
+                                        <td class="p-4 border-b">Can be difficult to park and navigate on very narrow country lanes.</td>
+                                    </tr>
+                                    <tr class="hover:bg-amber-100">
+                                        <td class="p-4 border-b font-semibold">Large SUV<br><span class="font-normal text-gray-500">(Not Recommended)</span></td>
+                                        <td class="p-4 border-b">Volvo XC90, Land Rover Discovery</td>
+                                        <td class="p-4 border-b">Good road presence and style.</td>
+                                        <td class="p-4 border-b">Luggage space is severely insufficient for 5 large bags. Would be very cramped.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <div class="border-t pt-8">
+                        <h3 class="font-bold text-2xl mb-4 text-cyan-800 text-center">Driving & Accommodation</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div class="bg-amber-50 rounded-lg shadow-md p-6 material-card"><h3 class="font-bold text-xl mb-3 text-cyan-800">Driving: Key UK Rules</h3><p class="text-slate-600">Your Indian licence is valid for 12 months. Remember: <strong>Drive on the LEFT</strong>, roundabouts flow CLOCKWISE (give way to your right), and speed limits are in MPH.</p></div>
+                             <div class="bg-amber-50 rounded-lg shadow-md p-6 material-card"><h3 class="font-bold text-xl mb-3 text-cyan-800">Accommodation: Hybrid Strategy</h3><p class="text-slate-600">A mix of lodging optimizes cost and experience. Use large Airbnbs for city bases (London, Edinburgh), and authentic cottages or inns in scenic areas like the Cotswolds and Highlands.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pre-trip Checklist -->
+            <section id="checklist" class="scroll-mt-16">
+                 <h2 class="text-4xl font-bold text-slate-800 mb-8 text-center section-title">Pre-Booking & Resources</h2>
+                 <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 material-card">
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-cyan-800">Booking Checklist</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>Flights & Visa</li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>Rental Car (7-Seater MPV)</li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>All Accommodations</li>
+                             <li class="flex items-start"><span class="text-green-500 mr-3 mt-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>Attractions & Tours</li>
+                        </ul>
+                    </div>
+                     <div class="space-y-6">
+                         <h3 class="text-2xl font-bold text-cyan-800">Download Itinerary</h3>
+                         <p class="text-slate-600">Get a printable version of this itinerary to keep handy during your travels.</p>
+                         <button id="download-btn" class="inline-flex items-center bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-cyan-800 transition-all shadow-md hover:shadow-lg">
+                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                             Download PDF
+                         </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="bg-slate-800 text-white"><div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm"><p>&copy; 2025 The Albion & Caledonia Expedition. Itinerary designed by Parth.</p></div></footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.10.3/simple-lightbox.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const itineraryData = [
+             { day: 1, date: "Jul 19", dayOfWeek: "Saturday", title: 'Arrival & London Immersion', location: 'London',
+                accommodation: { name: '3-BR Airbnb', type: 'Shoreditch/Bermondsey', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' },
+                schedule: [ 
+                    { time: '07:30', activity: '✈️ Arrive at LHR, clear immigration & baggage.' }, 
+                    { time: '09:00', activity: '🚆 Transfer to Airbnb via Elizabeth Line.' },
+                    { time: '10:30', activity: '짐 Drop luggage at Airbnb.' },
+                    { time: '11:00', activity: '☕ Coffee & Snack at a local cafe.' },
+                    { time: '13:00', activity: '🏨 Official Check-in, unpack, and rest.' },
+                    { time: '15:00', activity: '🚶 Explore local area, head to Borough Market.' },
+                    { time: '18:00', activity: '🍴 Dinner at Borough Market or a local pub.' },
+                    { time: '20:00', activity: '🛋️ Leisure time at Airbnb.' },
+                    { time: '22:00', activity: '🛌 Sleep (combat jet lag).' }
+                ]},
+            { day: 2, date: "Jul 20", dayOfWeek: "Sunday", title: 'Royalty & Politics', location: 'London',
+                accommodation: { name: 'London Airbnb', type: 'As above', link: 'https://www.airbnb.co.uk/s/London/homes?adults=5&checkin=2025-07-19&checkout=2025-07-23' },
+                schedule: [ 
+                    { time: '09:00', activity: '🍳 Breakfast at Airbnb.' },
+                    { time: '10:00', activity: '💂 Witness Changing of the Guard at Buckingham Palace.' },
+                    { time: '11:00', activity: '🏰 Tour Buckingham Palace State Rooms (pre-booked).' },
+                    { time: '13:30', activity: '🍴 Lunch near Westminster.' },
+                    { time: '14:30', activity: '🚶 Walking tour: St. James\'s Park, Big Ben, Parliament.' },
+                    { time: '17:30', activity: '🛋️ Rest & refresh at Airbnb.' },
+                    { time: '19:00', activity: '🎭 Attend a West End Theatre Show.' },
+                    { time: '22:30', activity: '🛌 Sleep.' }
+                ]},
+             { day: 5, date: "Jul 23", dayOfWeek: "Wednesday", title: 'The Great Escape', location: 'Cotswolds',
+                accommodation: { name: 'Self-Catering Cottage', type: 'Cotswolds', link: 'https://www.airbnb.co.uk/s/Cotswolds--United-Kingdom/homes?adults=5&checkin=2025-07-23&checkout=2025-07-25' },
+                schedule: [ 
+                    { time: '09:00', activity: '🚗 Pick up rental car from LHR.' },
+                    { time: '11:00', activity: '🏰 Drive to & explore Windsor Castle.' },
+                    { time: '15:30', activity: '🍴 Late lunch in Windsor.' },
+                    { time: '16:30', activity: '🚗 Drive to the Cotswolds.' },
+                    { time: '18:00', activity: '🏞️ Photo stop at Castle Combe village.' },
+                    { time: '19:30', activity: '🏨 Check into cottage and have a pub dinner.' },
+                    { time: '22:00', activity: '🛌 Sleep.' }
+                ]},
+             { day: 8, date: "Jul 26", dayOfWeek: "Saturday", title: 'The Road to Scotland', location: 'Edinburgh',
+                accommodation: { name: '3-BR Airbnb', type: 'New Town/Marchmont', link: 'https://www.airbnb.co.uk/s/Edinburgh--United-Kingdom/homes?adults=5&checkin=2025-07-26&checkout=2025-07-29' },
+                schedule: [ 
+                    { time: '10:00', activity: '🏛️ Explore John Rylands Library in Manchester.' },
+                    { time: '13:00', activity: '🚗 Drive north towards Scotland.' },
+                    { time: '15:30', activity: '🧱 Stop at Hadrian\'s Wall for a historic walk.' },
+                    { time: '19:00', activity: '🏨 Arrive & check into Airbnb in Edinburgh.' },
+                    { time: '20:00', activity: '🍴 Relaxed dinner or takeaway.' },
+                    { time: '22:00', activity: '🛌 Sleep.' }
+                ]},
+             { day: 12, date: "Jul 30", dayOfWeek: "Wednesday", title: 'Monsters & Magic', location: 'Scottish Highlands',
+                accommodation: { name: 'Inverness Hotel/B&B', type: 'Inverness', link: 'https://www.airbnb.co.uk/s/Inverness--United-Kingdom/homes?adults=5&checkin=2025-07-29&checkout=2025-07-31' },
+                schedule: [ 
+                    { time: '08:00', activity: '🏞️ Drive along Loch Ness, optional boat cruise.' },
+                    { time: '10:00', activity: '🏰 Stop at Eilean Donan Castle for photos.' },
+                    { time: '11:30', activity: '⛰️ Arrive on Isle of Skye, explore Portree.' },
+                    { time: '13:00', activity: '🍴 Lunch in Portree.' },
+                    { time: '14:00', activity: '🚗 Scenic drive: Old Man of Storr & The Quiraing.' },
+                    { time: '17:00', activity: '🚗 Begin scenic drive back to Inverness.' },
+                    { time: '19:30', activity: '🏨 Arrive back in Inverness for dinner.' },
+                    { time: '22:00', activity: '🛌 Sleep.' }
+                ]},
+            { day: 15, date: "Aug 2", dayOfWeek: "Saturday", title: 'Homeward Bound', location: 'London',
+                accommodation: { name: 'N/A', type: 'Departure Day', link: '#' },
+                schedule: [ 
+                    { time: '06:00', activity: '🚗 Final drive from hotel to LHR.' },
+                    { time: '06:45', activity: '🚗 Return rental car.' },
+                    { time: '07:00', activity: '✈️ Check-in for flight AI 162.' },
+                    { time: '09:45', activity: '✈️ Depart from London Heathrow (LHR).' }
+                ]},
+        ];
+
+         const localEvents = [
+            { city: 'London', event: 'Buckingham Palace Summer Opening', description: 'Tour the magnificent State Rooms at the King\'s official London residence. Open for a limited time each summer.', date: 'Until 28 July'},
+            { city: 'London', event: 'Regent\'s Park Open Air Theatre', description: 'Enjoy classic plays and musicals under the stars in one of London\'s most beautiful parks.', date: 'Throughout July'},
+            { city: 'London', event: 'Zoo Nights at London Zoo', description: 'An adults-only evening event with street food, music, and a chance to see the animals after hours.', date: 'Friday evenings in July'},
+            { city: 'York', event: 'Yorkshire Fringe Festival', description: 'Catch comedy, theatre, and music acts in pop-up venues across the city in the run-up to the Edinburgh Fringe.', date: 'Late July'},
+            { city: 'Manchester', event: 'Sounds of the City', description: 'A series of major open-air concerts at Castlefield Bowl, featuring world-renowned headline acts.', date: 'Throughout July'},
+            { city: 'Edinburgh', event: 'Edinburgh Jazz & Blues Festival', description: 'Catch the start of Edinburgh\'s festival season with groovy tunes and soulful music at venues across the city.', date: 'Mid-to-late July'}
+        ];
+
+        const accordionContainer = document.getElementById('accordion-container');
+        itineraryData.forEach((item) => {
+            const accItem = document.createElement('div');
+            accItem.className = 'accordion-item bg-white rounded-xl shadow-lg material-card overflow-hidden';
+            accItem.id = `day-${item.day}`;
+            accItem.innerHTML = `
+                <button class="accordion-header w-full text-left p-6 flex justify-between items-center">
+                    <div class="flex-grow">
+                        <p class="text-cyan-700 font-bold text-2xl">Day ${item.day}</p>
+                        <p class="text-sm text-slate-500">${item.dayOfWeek}, ${item.date}</p>
+                        <p class="font-semibold text-slate-800 text-xl mt-1">${item.title}</p>
+                        <p class="text-sm text-slate-600">${item.location}</p>
+                    </div>
+                    <svg class="w-6 h-6 transform transition-transform text-cyan-700 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="p-6 border-t">
+                        <h3 class="font-bold text-lg mb-4 text-cyan-800">Schedule</h3>
+                        <ul class="space-y-3">
+                            ${item.schedule.map(event => `
+                                <li class="flex items-start"><strong class="w-24 text-slate-600 font-medium">${event.time}</strong><span>${event.activity}</span></li>
+                            `).join('')}
+                        </ul>
+                        ${item.accommodation.link !== '#' ? `
+                        <div class="mt-4 pt-4 border-t">
+                            <h4 class="font-semibold text-slate-700">Tonight's Stay: ${item.accommodation.name}</h4>
+                            <p class="text-sm text-slate-500">Suggested Area/Type: ${item.accommodation.type}</p>
+                            <a href="${item.accommodation.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-sm text-blue-600 hover:underline">Check Prices on Airbnb (details pre-filled) &rarr;</a>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            accordionContainer.appendChild(accItem);
+        });
+
+        const eventsContainer = document.getElementById('events-container');
+        localEvents.forEach(event => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow-lg p-6 material-card';
+            card.innerHTML = `
+                <h3 class="font-bold text-xl mb-2 text-cyan-800">${event.city}</h3>
+                <p class="text-slate-700 font-semibold">${event.event}</p>
+                <p class="text-sm text-slate-500 mb-3">${event.date}</p>
+                <p class="text-slate-600 text-sm">${event.description}</p>
+            `;
+            eventsContainer.appendChild(card);
+        });
         
-        const content = document.createElement('div');
-        content.className = 'accordion-content';
-        let scheduleHtml = `<div class="p-4 border-t border-gray-200"><ul class="space-y-3">`;
-        item.schedule.forEach(event => {
-            scheduleHtml += `<li class="flex"><strong class="w-28 text-slate-600 font-medium">${event.time}</strong><span>${event.activity}</span></li>`;
-        });
-        scheduleHtml += '</ul>';
-        if (item.accommodation.link !== '#') {
-            scheduleHtml += `<div class="mt-4 pt-4 border-t">
-                                <h4 class="font-semibold text-slate-700">Tonight's Stay: ${item.accommodation.name}</h4>
-                                <p class="text-sm text-slate-500">Suggested Area/Type: ${item.accommodation.type}</p>
-                                <a href="${item.accommodation.link}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-sm text-blue-600 hover:underline">Check Prices & Availability &rarr;</a>
-                             </div>`;
-        }
-        scheduleHtml += `</div>`;
-        content.innerHTML = scheduleHtml;
-
-        section.appendChild(header);
-        section.appendChild(content);
-        accordionContainer.appendChild(section);
-
-        header.addEventListener('click', () => {
-            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
-            document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = '0px');
-            document.querySelectorAll('.accordion-header svg').forEach(svg => svg.style.transform = '');
-            if (!isOpen) {
-                content.style.maxHeight = content.scrollHeight + "px";
-                header.querySelector('svg').style.transform = 'rotate(180deg)';
-            }
-        });
-    });
-
-    const eventsContainer = document.getElementById('events-container');
-    localEvents.forEach(event => {
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-lg shadow-lg p-6 material-card';
-        card.innerHTML = `
-            <h3 class="font-bold text-xl mb-2 text-cyan-800">${event.city}</h3>
-            <p class="text-slate-700 font-semibold">${event.event}</p>
-            <p class="text-sm text-slate-500 mb-3">${event.date}</p>
-            <p class="text-slate-600 text-sm">${event.description}</p>
-        `;
-        eventsContainer.appendChild(card);
-    });
-
-    const budgetData = {
-        perPerson: {
-            labels: ['Accommodation', 'Food', 'Attractions', 'Miscellaneous', 'Fuel'],
-            values: [1280, 850, 316, 425, 51]
-        },
-        group: {
-            labels: ['Accommodation', 'Food', 'Attractions', 'Miscellaneous', 'Fuel'],
-            values: [6400, 4250, 1580, 2125, 255]
-        }
-    };
-
-    const formatCurrency = (amount, currency) => new Intl.NumberFormat(currency === 'GBP' ? 'en-GB' : 'en-IN', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(amount);
-    
-    const budgetText = document.getElementById('budgetText');
-    let currentView = 'perPerson';
-
-    const updateBudgetText = () => {
-        const totalGbp = budgetData[currentView].values.reduce((a, b) => a + b, 0);
-        const totalInr = totalGbp * GBP_TO_INR_RATE;
-        if (currentView === 'perPerson') {
-            budgetText.innerHTML = `Total Per Person: <strong class="text-red-600">${formatCurrency(totalGbp, 'GBP')}</strong> / ${formatCurrency(totalInr, 'INR')}`;
-        } else {
-            budgetText.innerHTML = `Total For Group: <strong class="text-red-600">${formatCurrency(totalGbp, 'GBP')}</strong> / ${formatCurrency(totalInr, 'INR')}`;
-        }
-    };
-    
-    const ctx = document.getElementById('budgetChart').getContext('2d');
-    const budgetChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: budgetData.perPerson.labels,
-            datasets: [{
-                label: 'Cost in £',
-                data: budgetData.perPerson.values,
-                backgroundColor: ['#0e7490', '#15803d', '#be123c', '#a16207', '#4a5568'],
-                borderColor: '#fefce8',
-                borderWidth: 4
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) { label += ': '; }
-                            if (context.parsed !== null) {
-                                const gbp = context.parsed;
-                                const inr = gbp * GBP_TO_INR_RATE;
-                                label += `${formatCurrency(gbp, 'GBP')} (${formatCurrency(inr, 'INR')})`;
-                            }
-                            return label;
-                        }
-                    }
-                }
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.from(".hero h1, .hero p", { duration: 1, y: 30, opacity: 0, stagger: 0.2, ease: "power3.out" });
+        
+        gsap.to(".parallax-img", {
+            scrollTrigger: {
+                trigger: ".parallax-container",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
             },
-            cutout: '60%'
-        }
-    });
+            scale: 1,
+            y: 0
+        });
 
-    const toggleBtn = document.getElementById('toggleBudgetBtn');
-    toggleBtn.addEventListener('click', () => {
-        currentView = (currentView === 'perPerson') ? 'group' : 'perPerson';
-        budgetChart.data.datasets[0].data = budgetData[currentView].values;
-        toggleBtn.textContent = (currentView === 'perPerson') ? 'Show Total Group Budget' : 'Show Per Person Budget';
+        document.querySelectorAll('section').forEach(section => {
+            gsap.from(section.querySelectorAll('.section-title, .material-card'), {
+                scrollTrigger: { trigger: section, start: "top 80%" },
+                duration: 1, y: 50, opacity: 0, stagger: 0.1, ease: "power3.out"
+            });
+        });
+
+        // Accordion Logic
+        document.querySelectorAll('.accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const item = header.parentElement;
+                item.classList.toggle('open');
+                const icon = header.querySelector('svg');
+                gsap.to(icon, { rotation: item.classList.contains('open') ? 180 : 0, duration: 0.4, ease: "power2.inOut" });
+            });
+        });
+
+        // Download Button
+        document.getElementById('download-btn').addEventListener('click', () => {
+             window.print();
+        });
+
+        // Custom Cursor
+        const cursorDot = document.querySelector(".cursor-dot");
+        const cursorOutline = document.querySelector(".cursor-outline");
+        window.addEventListener("mousemove", function (e) {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            gsap.to(cursorDot, {duration: 0.1, x: posX, y: posY});
+            gsap.to(cursorOutline, {duration: 0.4, x: posX, y: posY, ease: "power2.out"});
+        });
+
+        // Interactive Path
+        const pathContainer = document.querySelector('.path-container');
+        const path = document.getElementById('route-path');
+        const pathLength = path.getTotalLength();
+        const cities = [
+            { name: 'London', day: 1, pos: 0.1 },
+            { name: 'Cotswolds', day: 5, pos: 0.35 },
+            { name: 'Edinburgh', day: 8, pos: 0.65 },
+            { name: 'Highlands', day: 12, pos: 0.8 },
+            { name: 'London', day: 15, pos: 0.95 }
+        ];
+        cities.forEach(city => {
+            const point = path.getPointAtLength(city.pos * pathLength);
+            const node = document.createElement('div');
+            node.className = 'path-node';
+            node.innerHTML = `Day ${city.day}<br>${city.name}`;
+            node.style.left = `${point.x - 40}px`;
+            node.style.top = `${point.y - 40}px`;
+            node.addEventListener('click', () => {
+                document.getElementById(`day-${city.day}`).scrollIntoView({ behavior: 'smooth' });
+            });
+            pathContainer.appendChild(node);
+        });
+
+        // Budget Chart
+        const budgetData = {
+            perPerson: {
+                labels: ['Accommodation', 'Food', 'Attractions', 'Miscellaneous', 'Fuel'],
+                values: [1280, 850, 316, 425, 51]
+            },
+            group: {
+                labels: ['Accommodation', 'Food', 'Attractions', 'Miscellaneous', 'Fuel'],
+                values: [6400, 4250, 1580, 2125, 255]
+            }
+        };
+        const formatCurrency = (amount, currency) => new Intl.NumberFormat(currency === 'GBP' ? 'en-GB' : 'en-IN', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(amount);
+        const budgetText = document.getElementById('budgetText');
+        let currentView = 'perPerson';
+        const updateBudgetText = () => {
+            const totalGbp = budgetData[currentView].values.reduce((a, b) => a + b, 0);
+            const totalInr = totalGbp * 105.5;
+            if (currentView === 'perPerson') {
+                budgetText.innerHTML = `Total Per Person: <strong class="text-red-600">${formatCurrency(totalGbp, 'GBP')}</strong> / ${formatCurrency(totalInr, 'INR')}`;
+            } else {
+                budgetText.innerHTML = `Total For Group: <strong class="text-red-600">${formatCurrency(totalGbp, 'GBP')}</strong> / ${formatCurrency(totalInr, 'INR')}`;
+            }
+        };
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        const budgetChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: budgetData.perPerson.labels,
+                datasets: [{
+                    label: 'Cost in £',
+                    data: budgetData.perPerson.values,
+                    backgroundColor: ['#0e7490', '#15803d', '#be123c', '#a16207', '#4a5568'],
+                    borderColor: '#fefce8',
+                    borderWidth: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+        const toggleBtn = document.getElementById('toggleBudgetBtn');
+        toggleBtn.addEventListener('click', () => {
+            currentView = (currentView === 'perPerson') ? 'group' : 'perPerson';
+            budgetChart.data.datasets[0].data = budgetData[currentView].values;
+            toggleBtn.textContent = (currentView === 'perPerson') ? 'Show Total Group Budget' : 'Show Per Person Budget';
+            updateBudgetText();
+            budgetChart.update();
+        });
         updateBudgetText();
-        budgetChart.update();
-    });
-    updateBudgetText();
 
-    document.querySelectorAll('.map-hotspot').forEach(spot => {
-        spot.addEventListener('click', function() {
-            const targetId = this.dataset.scrollTo;
-            const targetElement = document.querySelector(targetId);
-            if(targetElement) {
-                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                const header = targetElement.querySelector('.accordion-header');
-                const content = targetElement.querySelector('.accordion-content');
-                if (!content.style.maxHeight || content.style.maxHeight === '0px') {
-                   setTimeout(() => header.click(), 300);
-                }
-            }
+        // Conversion Utilities
+        const gbpInput = document.getElementById('gbp-input');
+        const inrInput = document.getElementById('inr-input');
+        const milesInput = document.getElementById('miles-input');
+        const kmInput = document.getElementById('km-input');
+        const GBP_TO_INR_RATE = 105.5;
+        const MILES_TO_KM_RATE = 1.60934;
+
+        gbpInput.addEventListener('input', () => {
+            const gbpValue = parseFloat(gbpInput.value);
+            inrInput.value = !isNaN(gbpValue) ? (gbpValue * GBP_TO_INR_RATE).toFixed(2) : '';
+        });
+        inrInput.addEventListener('input', () => {
+            const inrValue = parseFloat(inrInput.value);
+            gbpInput.value = !isNaN(inrValue) ? (inrValue / GBP_TO_INR_RATE).toFixed(2) : '';
+        });
+        milesInput.addEventListener('input', () => {
+            const milesValue = parseFloat(milesInput.value);
+            kmInput.value = !isNaN(milesValue) ? (milesValue * MILES_TO_KM_RATE).toFixed(2) : '';
+        });
+        kmInput.addEventListener('input', () => {
+            const kmValue = parseFloat(kmInput.value);
+            milesInput.value = !isNaN(kmValue) ? (kmValue / MILES_TO_KM_RATE).toFixed(2) : '';
+        });
+
+        // Hamburger Menu Logic
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('open');
+        });
+        // Close menu when a link is clicked
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+            });
         });
     });
-
-    const sections = document.querySelectorAll('.fade-in-section');
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-            }
-        });
-    }, { threshold: 0.1 });
-    sections.forEach(section => observer.observe(section));
-
-    // Conversion Utilities
-    const gbpInput = document.getElementById('gbp-input');
-    const inrInput = document.getElementById('inr-input');
-    const milesInput = document.getElementById('miles-input');
-    const kmInput = document.getElementById('km-input');
-
-    gbpInput.addEventListener('input', () => {
-        const gbpValue = parseFloat(gbpInput.value);
-        if (!isNaN(gbpValue)) {
-            inrInput.value = (gbpValue * GBP_TO_INR_RATE).toFixed(2);
-        } else {
-            inrInput.value = '';
-        }
-    });
-
-    inrInput.addEventListener('input', () => {
-        const inrValue = parseFloat(inrInput.value);
-        if (!isNaN(inrValue)) {
-            gbpInput.value = (inrValue / GBP_TO_INR_RATE).toFixed(2);
-        } else {
-            gbpInput.value = '';
-        }
-    });
-
-    milesInput.addEventListener('input', () => {
-        const milesValue = parseFloat(milesInput.value);
-        if (!isNaN(milesValue)) {
-            kmInput.value = (milesValue * MILES_TO_KM_RATE).toFixed(2);
-        } else {
-            kmInput.value = '';
-        }
-    });
-
-    kmInput.addEventListener('input', () => {
-        const kmValue = parseFloat(kmInput.value);
-        if (!isNaN(kmValue)) {
-            milesInput.value = (kmValue / MILES_TO_KM_RATE).toFixed(2);
-        } else {
-            milesInput.value = '';
-        }
-    });
-});
-</script>
+    </script>
 </body>
-</ht```
-I will fix the bugs in the immersive artifact.
-I will add the following features:
-- Interactive map with markers
-- Itinerary with animated carousels and lightbox
-- Scroll-based animations
-- Floating action button for quick access
-- Download/print button for the itiner
+</html>
